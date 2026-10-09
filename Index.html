@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="theme-color" content="#0A1230">
+<title>c.b book</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<g id="cvg" fill="none" stroke="#25B4FF" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M24 106 L214 98 Q206 128 168 138 L70 138 Q36 130 24 106 Z"/>
+<path d="M24 106 L24 92 L58 92 L58 104"/>
+<path d="M190 99 L190 88 L214 86 L214 98"/>
+<path d="M36 118 Q120 130 204 112"/>
+<path d="M120 100 L120 16"/>
+<path d="M168 98 L168 34"/>
+<path d="M68 92 L68 42"/>
+<path d="M214 98 L238 84"/>
+<path d="M82 26 Q120 42 158 26 L152 80 Q120 94 88 80 Z"/>
+<path d="M120 44 L120 66 M110 55 L130 55"/>
+<path d="M168 36 L212 94 L172 90 Z"/>
+<path d="M68 44 L26 90 L66 88 Z"/>
+<path d="M120 16 L142 21 L120 27"/>
+<path d="M120 16 L214 98" stroke-width="0.6"/>
+<path d="M120 16 L24 92" stroke-width="0.6"/>
+<path d="M168 34 L238 84" stroke-width="0.6"/>
+<path d="M0 146 q10 -7 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0"/>
+<path d="M10 154 q10 -7 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" stroke-width="0.7"/>
+<circle cx="214" cy="22" r="11" stroke-width="0.9"/>
+<circle cx="40" cy="26" r="1" fill="#25B4FF" stroke="none"/>
+<circle cx="56" cy="14" r="1.2" fill="#25B4FF" stroke="none"/>
+<circle cx="190" cy="52" r="1" fill="#25B4FF" stroke="none"/>
+</g>
+</defs>
+</svg>
+
+<div id="app">
+<div class="toast" id="toast">ok</div>
+
+<!-- LOGIN -->
+<div class="sc act" id="s-login">
+<div class="hero" style="padding:44px 20px 30px;text-align:center;border-radius:0 0 32px 32px">
+<svg class="ship" viewBox="0 0 240 160" style="width:330px;right:-60px;bottom:-14px;opacity:.3" aria-hidden="true"><use href="#cvg"/></svg>
+<svg width="90" height="90" viewBox="0 0 200 200" aria-hidden="true">
+<circle cx="100" cy="100" r="94" fill="none" stroke="#25B4FF" stroke-width="4"/>
+<circle cx="100" cy="100" r="84" fill="none" stroke="#25B4FF" stroke-width="1.5"/>
+<rect x="95" y="1" width="10" height="10" transform="rotate(45 100 6)" fill="#25B4FF"/>
+<rect x="95" y="189" width="10" height="10" transform="rotate(45 100 194)" fill="#25B4FF"/>
+<text x="100" y="122" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="70" fill="#EDEBFA">c.b</text>
+<text x="100" y="152" text-anchor="middle" font-family="Georgia, serif" font-size="15" letter-spacing="5" fill="#25B4FF">book</text>
+</svg>
+<div class="sf" style="font-size:26px;font-style:italic;margin-top:8px">Leia, estude, escreva.</div>
+<div style="font-size:13px;opacity:.75;margin-top:2px">Leitura, concursos e criação em um só lugar</div>
+</div>
+<div class="pad">
+<input class="ip" id="lg-mail" type="email" placeholder="E-mail" aria-label="E-mail" autocomplete="email">
+<input class="ip" id="lg-pass" type="password" placeholder="Senha" aria-label="Senha" autocomplete="current-password">
+<div style="text-align:right;margin-top:8px"><button class="lk">Esqueci a senha</button></div>
+<button class="pb" onclick="enterApp()">Entrar</button>
+<button class="ob" onclick="go('s-signup')">Criar conta</button>
+<div class="mut" style="text-align:center;margin-top:auto;padding-top:12px">Ao continuar você aceita os termos e a política de privacidade.</div>
+</div>
+</div>
+
+<!-- CRIAR CONTA -->
+<div class="sc" id="s-signup">
+<div class="pad">
+<div class="rowb"><button class="ib" onclick="go('s-login')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button><span class="mut">Passo 1 de 3</span></div>
+<div class="seg"><i class="f"></i><i></i><i></i></div>
+<div class="sf" style="font-size:28px;font-style:italic;margin-top:22px">Criar conta</div>
+<div class="mut" style="margin-top:2px">Leva menos de um minuto.</div>
+<input class="ip" id="su-name" placeholder="Seu nome" style="margin-top:20px" aria-label="Nome" autocomplete="name">
+<input class="ip" id="su-mail" type="email" placeholder="E-mail" aria-label="E-mail" autocomplete="email">
+<input class="ip" id="su-pass" type="password" placeholder="Crie uma senha" aria-label="Senha" autocomplete="new-password">
+<button class="rowb" id="terms" onclick="tgTerms()" style="background:none;border:none;color:#F1EFFC;margin-top:16px;cursor:pointer;text-align:left;align-items:flex-start;padding:0">
+<span id="tbox" style="width:18px;height:18px;border-radius:5px;border:1px solid #25B4FF;background:rgba(37,180,255,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-check" style="font-size:13px;color:#25B4FF" aria-hidden="true"></i></span>
+<span class="mut" style="line-height:1.5">Li e aceito os termos de uso e a política de privacidade.</span>
+</button>
+<button class="pb" style="margin-top:auto" onclick="signup()">Continuar</button>
+</div>
+</div>
+
+<!-- PLANO -->
+<div class="sc" id="s-plan">
+<div class="pad">
+<div class="rowb"><button class="ib" onclick="go('s-signup')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button><span class="mut">Passo 2 de 3</span></div>
+<div class="seg"><i class="f"></i><i class="f"></i><i></i></div>
+<div class="sf" style="font-size:28px;font-style:italic;margin-top:22px">Escolha seu plano</div>
+<div class="mut" style="margin-top:2px">Você pode mudar quando quiser.</div>
+<button class="pl" id="p0" onclick="selPlan(0)" style="margin-top:18px">
+<div style="display:flex;justify-content:space-between"><span class="sf" style="font-size:17px">Gratuito</span><span>R$ 0</span></div>
+<div class="mut" style="margin-top:4px;line-height:1.5">Registro de leitura, metas, gráficos e 10 questões por dia.</div></button>
+<button class="pl sel" id="p1" onclick="selPlan(1)">
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="sf" style="font-size:17px">Leitor <span style="font-size:10px;background:#25B4FF;color:#06122E;border-radius:8px;padding:2px 7px;margin-left:4px;font-family:system-ui,sans-serif">mais escolhido</span></span><span>R$ 14,90/mês</span></div>
+<div class="mut" style="margin-top:4px;line-height:1.5">Clássicos completos, ebooks, questões ilimitadas e caderno de erros.</div></button>
+<button class="pl" id="p2" onclick="selPlan(2)">
+<div style="display:flex;justify-content:space-between"><span class="sf" style="font-size:17px">Autor</span><span>R$ 29,90/mês</span></div>
+<div class="mut" style="margin-top:4px;line-height:1.5">Tudo do Leitor, mais Estúdio completo de livro e HQ para publicar.</div></button>
+<button class="pb" id="planbtn" style="margin-top:auto" onclick="go('s-int')">Continuar com Leitor</button>
+</div>
+</div>
+
+<!-- INTERESSES -->
+<div class="sc" id="s-int">
+<div class="pad">
+<div class="rowb"><button class="ib" onclick="go('s-plan')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button><span class="mut">Passo 3 de 3</span></div>
+<div class="seg"><i class="f"></i><i class="f"></i><i class="f"></i></div>
+<div class="sf" style="font-size:28px;font-style:italic;margin-top:22px">O que você gosta de ler?</div>
+<div class="mut" style="margin-top:2px">Escolha quantos quiser. Isso monta o seu Descobrir.</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:20px" id="ints">
+<button class="ch" onclick="tgInt(this)">Clássicos</button>
+<button class="ch" onclick="tgInt(this)">História</button>
+<button class="ch" onclick="tgInt(this)">Filosofia</button>
+<button class="ch" onclick="tgInt(this)">Ficção</button>
+<button class="ch" onclick="tgInt(this)">HQs</button>
+<button class="ch" onclick="tgInt(this)">Poesia</button>
+<button class="ch" onclick="tgInt(this)">Ciência</button>
+<button class="ch" onclick="tgInt(this)">Enem e concursos</button>
+<button class="ch" onclick="tgInt(this)">Artigos</button>
+</div>
+<div class="mut" id="intcount" style="margin-top:14px">Nenhum escolhido ainda</div>
+<button class="pb" style="margin-top:auto" onclick="enterApp()">Entrar no app</button>
+</div>
+</div>
+
+<!-- APP -->
+<div class="sc" id="s-app">
+<div class="views">
+
+<!-- HOJE -->
+<div class="v" id="v-hoje">
+<div class="hero">
+<svg class="ship" viewBox="0 0 240 160" aria-hidden="true"><use href="#cvg"/></svg>
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><div class="mut greet">Bom dia</div><div class="sf" style="font-size:30px;font-style:italic">Seu dia</div></div>
+<div class="pill"><i class="ti ti-flame" aria-hidden="true"></i><span class="stk">6</span> dias</div>
+</div>
+<div class="mut today" style="margin-top:6px"></div>
+<div style="display:flex;gap:8px;margin-top:14px">
+<button class="wb" style="margin-top:0" onclick="openSheet()">Registrar leitura</button>
+<button class="wb g" style="margin-top:0" onclick="tab('conc')">Praticar questões</button>
+</div>
+</div>
+
+<div class="sec"><span class="sf" style="font-size:17px">Metas de hoje</span><span class="mut" id="gdone">0 de 3</span></div>
+<div class="card" style="padding:4px 14px">
+<button class="pr" onclick="openSheet()">
+<div class="ico"><i class="ti ti-book" aria-hidden="true"></i></div>
+<div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="t">Ler 30 páginas</span><span class="mut" id="hpt">18 / 30</span></div><div class="track" style="margin-top:6px"><div id="hp" style="width:60%"></div></div></div>
+</button>
+<button class="pr" onclick="tab('conc')">
+<div class="ico"><i class="ti ti-target-arrow" aria-hidden="true"></i></div>
+<div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="t">Resolver 20 questões</span><span class="mut" id="hqt">12 / 20</span></div><div class="track" style="margin-top:6px"><div id="hq" style="width:60%"></div></div></div>
+</button>
+<button class="pr" onclick="tab('est')">
+<div class="ico"><i class="ti ti-feather" aria-hidden="true"></i></div>
+<div style="flex:1"><div style="display:flex;justify-content:space-between"><span class="t">Escrever 300 palavras</span><span class="mut" id="hwt">140 / 300</span></div><div class="track" style="margin-top:6px"><div id="hw" style="width:47%"></div></div></div>
+</button>
+</div>
+
+<div class="sec"><span class="sf" style="font-size:17px">Para hoje</span></div>
+<button class="card tap" onclick="tgDay()" style="display:flex;align-items:center;gap:12px;width:calc(100% - 32px);color:#F1EFFC;font-size:14px;text-align:left;cursor:pointer">
+<div class="ico"><i class="ti ti-compass" aria-hidden="true"></i></div>
+<div style="flex:1"><div class="t">Leitura do dia</div><div class="mut">Um clássico curto, para 15 minutos</div></div>
+<span class="ck" id="dayck"></span>
+</button>
+<button class="card tap" onclick="tab('conc')" style="display:flex;align-items:center;gap:12px;width:calc(100% - 32px);color:#F1EFFC;font-size:14px;text-align:left;cursor:pointer">
+<div class="ico"><i class="ti ti-notebook" aria-hidden="true"></i></div>
+<div style="flex:1"><div class="t">Caderno de erros</div><div class="mut"><span class="errn">5</span> questões para revisar</div></div>
+<i class="ti ti-chevron-right" style="color:#7F88B8" aria-hidden="true"></i>
+</button>
+</div>
+
+<!-- LEITURA -->
+<div class="v act" id="v-leitura">
+<div class="hero">
+<svg class="ship" viewBox="0 0 240 160" aria-hidden="true"><use href="#cvg"/></svg>
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><div class="mut greet">Bom dia</div><div class="sf" style="font-size:30px;font-style:italic">Leitura</div></div>
+<div class="pill"><i class="ti ti-flame" aria-hidden="true"></i><span class="stk">6</span> dias</div>
+</div>
+<div style="display:flex;align-items:center;gap:16px;margin-top:14px">
+<svg width="116" height="116" viewBox="0 0 120 120" role="img" aria-label="Progresso da meta diária de páginas">
+<circle cx="60" cy="60" r="52" fill="none" stroke="rgba(37,180,255,.22)" stroke-width="6"/>
+<circle id="ringp" class="ringp" cx="60" cy="60" r="52" fill="none" stroke="#25B4FF" stroke-width="6" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7" transform="rotate(-90 60 60)"/>
+<text id="ringn" x="60" y="66" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#fff">18</text>
+<text x="60" y="84" text-anchor="middle" font-size="10" fill="rgba(237,235,250,.75)">de 30 páginas</text>
+</svg>
+<div>
+<div id="rsub" style="font-size:14px;line-height:1.4">Faltam 12 páginas para fechar o dia</div>
+<button class="wb" onclick="openSheet()"><i class="ti ti-plus" style="vertical-align:-2px" aria-hidden="true"></i> Registrar páginas</button>
+</div>
+</div>
+</div>
+
+<div class="sub"><button class="on" onclick="tab('leitura')">Minha leitura</button><button onclick="tab('desc')">Descobrir</button></div>
+
+<div class="card">
+<div class="rowb" style="justify-content:space-between;align-items:flex-start">
+<div class="rowb" style="gap:10px"><div class="ico"><i class="ti ti-chart-donut-3" aria-hidden="true"></i></div><div><div class="t">Páginas por tipo</div><div class="mut" id="ptot">412 páginas no total</div></div></div>
+<div class="tg"><button class="on" id="sg0" onclick="showChart(0)">Rosca</button><button id="sg1" onclick="showChart(1)">Barras</button></div>
+</div>
+<div id="ch0" style="margin-top:12px">
+<div class="rowb" style="gap:16px">
+<svg width="100" height="100" viewBox="0 0 100 100" role="img" aria-label="Rosca com páginas lidas por tipo">
+<g fill="none" stroke-width="10" transform="rotate(-90 50 50)">
+<circle id="d0" cx="50" cy="50" r="40" stroke="#25B4FF" stroke-dasharray="0 251.3"/>
+<circle id="d1" cx="50" cy="50" r="40" stroke="#4F6BFF" stroke-dasharray="0 251.3"/>
+<circle id="d2" cx="50" cy="50" r="40" stroke="#2EE6C8" stroke-dasharray="0 251.3"/>
+<circle id="d3" cx="50" cy="50" r="40" stroke="#9BE7FF" stroke-dasharray="0 251.3"/>
+</g>
+<text id="dtot" x="50" y="55" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#F1EFFC">412</text>
+</svg>
+<div style="display:grid;gap:6px;font-size:13px">
+<div><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:#25B4FF;margin-right:7px"></span><span id="l0">Livro</span></div>
+<div><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:#4F6BFF;margin-right:7px"></span><span id="l1">Ebook</span></div>
+<div><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:#2EE6C8;margin-right:7px"></span><span id="l2">Artigo</span></div>
+<div><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:#9BE7FF;margin-right:7px"></span><span id="l3">HQ</span></div>
+</div>
+</div>
+</div>
+<div id="ch1" style="display:none;margin-top:12px"><div class="brs" id="bars1"></div></div>
+</div>
+
+<div class="sec"><span class="sf" style="font-size:17px">Continuar lendo</span></div>
+<div class="card rowb">
+<div class="bk" style="--sp:#25B4FF"><span>D</span></div>
+<div style="flex:1;min-width:0">
+<div class="t">Dom Casmurro</div>
+<div class="mut">Machado de Assis</div>
+<div class="track" style="height:4px;margin-top:8px"><div style="width:44%;height:4px"></div></div>
+<div class="mut" style="margin-top:4px">p. 112 de 256 · 44%</div>
+</div>
+<button class="wb" style="margin-top:0;padding:9px 12px" onclick="openSheet()">Ler</button>
+</div>
+</div>
+
+<!-- DESCOBRIR -->
+<div class="v" id="v-desc">
+<div class="hero">
+<svg class="ship" viewBox="0 0 240 160" aria-hidden="true"><use href="#cvg"/></svg>
+<div class="mut">Com base em</div>
+<div class="sf" style="font-size:30px;font-style:italic">Descobrir</div>
+<div id="dchips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
+</div>
+<div class="sub"><button onclick="tab('leitura')">Minha leitura</button><button class="on" onclick="tab('desc')">Descobrir</button></div>
+
+<div class="card" style="background:#0F1B45;border-color:rgba(37,180,255,.5);box-shadow:0 0 18px rgba(37,180,255,.15)">
+<div class="rowb" style="gap:8px"><span class="badge">leitura do dia</span><span class="mut">15 min</span></div>
+<div class="rowb" style="margin-top:10px">
+<div class="bk" style="--sp:#2EE6C8"><span>A</span></div>
+<div style="flex:1"><div class="sf" style="font-size:20px;font-style:italic">O Alienista</div><div class="mut">Machado de Assis · Brasil</div><div class="mut">domínio público</div></div>
+</div>
+<button class="wb" onclick="toast('Abrindo O Alienista')">Ler agora</button>
+</div>
+
+<div class="sec"><span class="sf" style="font-size:17px">Para você</span></div>
+<div class="card rowb">
+<div class="bk" style="--sp:#4F6BFF"><span>M</span></div>
+<div style="flex:1;min-width:0"><div class="t">A Metamorfose</div><div class="mut">Franz Kafka · Praga</div><span class="badge" style="display:inline-block;margin-top:6px">clássico</span></div>
+<button class="sv" onclick="sv(this)"><i class="ti ti-bookmark" aria-hidden="true"></i> Salvar</button>
+</div>
+<div class="card rowb">
+<div class="bk" style="--sp:#9BE7FF"><span>C</span></div>
+<div style="flex:1;min-width:0"><div class="t">Crime e Castigo</div><div class="mut">Dostoiévski · Rússia</div><span class="badge" style="display:inline-block;margin-top:6px">clássico</span></div>
+<button class="sv" onclick="sv(this)"><i class="ti ti-bookmark" aria-hidden="true"></i> Salvar</button>
+</div>
+<div class="card rowb">
+<div class="bk" style="--sp:#25B4FF"><span>B</span></div>
+<div style="flex:1;min-width:0"><div class="t">Memórias Póstumas de Brás Cubas</div><div class="mut">Machado de Assis · Brasil</div><span class="badge" style="display:inline-block;margin-top:6px">Enem e concursos</span></div>
+<button class="sv" onclick="sv(this)"><i class="ti ti-bookmark" aria-hidden="true"></i> Salvar</button>
+</div>
+</div>
+
+<!-- CONCURSOS -->
+<div class="v" id="v-conc">
+<div class="hero">
+<svg class="ship" viewBox="0 0 240 160" aria-hidden="true"><use href="#cvg"/></svg>
+<div class="mut">Questões, simulados e revisão</div>
+<div class="sf" style="font-size:30px;font-style:italic">Concursos</div>
+<div class="tgc" id="tgc">
+<button class="on" onclick="setTg(0)">Enem</button>
+<button onclick="setTg(1)">Concurso público</button>
+<button onclick="setTg(2)">Vestibular</button>
+</div>
+<div style="display:flex;gap:8px;margin-top:14px">
+<div class="gl"><div class="mut">hoje</div><div class="sf" style="font-size:20px"><span id="qd">12</span><span class="mut">/20</span></div></div>
+<div class="gl"><div class="mut">acertos</div><div class="sf" style="font-size:20px" id="qacc">75%</div></div>
+<div class="gl"><div class="mut">caderno</div><div class="sf" style="font-size:20px"><span class="errn">5</span></div></div>
+</div>
+</div>
+
+<div class="sec"><span class="sf" style="font-size:17px">Questão do dia</span><span class="badge">exemplo</span></div>
+<div class="card" id="quiz"></div>
+
+<div class="sec"><span class="sf" style="font-size:17px">Plano de estudo de hoje</span><span class="mut" id="pdone">0 de 3</span></div>
+<div class="card" style="padding:4px 14px">
+<button class="pr" onclick="tgPl(0)"><span class="ck" id="pk0"></span><div style="flex:1"><div class="t" style="font-size:15px">Resolver 20 questões</div><div class="mut">marca sozinho ao chegar em 20</div></div></button>
+<button class="pr" onclick="tgPl(1)"><span class="ck" id="pk1"></span><div style="flex:1"><div class="t" style="font-size:15px">Revisar o caderno de erros</div><div class="mut"><span class="errn">5</span> questões</div></div></button>
+<button class="pr" onclick="tgPl(2)"><span class="ck" id="pk2"></span><div style="flex:1"><div class="t" style="font-size:15px">Resumo: Era Vargas</div><div class="mut">leitura de 10 minutos</div></div></button>
+</div>
+
+<div class="sec"><span class="sf" style="font-size:17px">Desempenho por matéria</span></div>
+<div class="card" id="subj1"></div>
+
+<div class="sec"><span class="sf" style="font-size:17px">Mais para treinar</span></div>
+<div class="card rowb tap" style="cursor:pointer" onclick="toast('Simulado de 10 questões em breve')">
+<div class="ico"><i class="ti ti-clock-hour-3" aria-hidden="true"></i></div>
+<div style="flex:1"><div class="t">Simulado curto</div><div class="mut">10 questões · 20 minutos</div></div>
+<i class="ti ti-chevron-right" style="color:#7F88B8" aria-hidden="true"></i>
+</div>
+<div class="card rowb tap" style="cursor:pointer" onclick="tab('est')">
+<div class="ico"><i class="ti ti-pencil" aria-hidden="true"></i></div>
+<div style="flex:1"><div class="t">Redação</div><div class="mut">Escreva no Estúdio e acompanhe a evolução</div></div>
+<i class="ti ti-chevron-right" style="color:#7F88B8" aria-hidden="true"></i>
+</div>
+</div>
+
+<!-- ESTÚDIO -->
+<div class="v" id="v-est">
+<div class="hero">
+<svg class="ship" viewBox="0 0 240 160" aria-hidden="true"><use href="#cvg"/></svg>
+<div class="mut">Meu primeiro livro</div>
+<div class="sf" style="font-size:30px;font-style:italic">Estúdio</div>
+<div style="display:flex;justify-content:space-between;margin-top:12px;font-size:12px"><span id="wtot">1.240 palavras</span><span style="opacity:.8">meta 5.000</span></div>
+<div style="height:5px;border-radius:3px;background:rgba(37,180,255,.22);margin-top:6px"><div id="wbar" style="height:5px;border-radius:3px;background:#25B4FF;width:25%;transition:width .5s;box-shadow:0 0 8px rgba(37,180,255,.8)"></div></div>
+</div>
+<div class="sec"><span class="sf" style="font-size:17px">Capítulos</span><span class="mut">toque para escrever +50</span></div>
+<div class="card" style="padding:4px 14px"><div id="chaps"></div></div>
+<div style="display:flex;gap:8px;margin:12px 16px 0">
+<button class="pb" style="margin-top:0" onclick="addChap('Capítulo '+(CH.length+1)+' · novo')"><i class="ti ti-plus" aria-hidden="true"></i> Novo capítulo</button>
+</div>
+<div class="card rowb tap" style="cursor:pointer" onclick="addChap('Rascunho · sonho de hoje')">
+<div class="ico"><i class="ti ti-moon" aria-hidden="true"></i></div>
+<div style="flex:1"><div class="t">Transformar sonho em história</div><div class="mut">Vira um rascunho de capítulo</div></div>
+<i class="ti ti-chevron-right" style="color:#7F88B8" aria-hidden="true"></i>
+</div>
+</div>
+
+<!-- PROGRESSO -->
+<div class="v" id="v-prog">
+<div class="hero">
+<svg class="ship" viewBox="0 0 240 160" aria-hidden="true"><use href="#cvg"/></svg>
+<div class="mut">Esta semana</div>
+<div class="sf" style="font-size:30px;font-style:italic">Progresso</div>
+</div>
+<div style="display:flex;gap:10px;margin:14px 16px 0">
+<div class="stat"><i class="ti ti-book" style="color:#25B4FF;font-size:18px" aria-hidden="true"></i><div class="sf" style="font-size:24px;margin-top:4px" id="wk">0</div><div class="mut">páginas</div></div>
+<div class="stat"><i class="ti ti-flame" style="color:#25B4FF;font-size:18px" aria-hidden="true"></i><div class="sf" style="font-size:24px;margin-top:4px"><span class="stk">6</span></div><div class="mut">dias seguidos</div></div>
+<div class="stat"><i class="ti ti-target-arrow" style="color:#25B4FF;font-size:18px" aria-hidden="true"></i><div class="sf" style="font-size:24px;margin-top:4px" id="qacc2">75%</div><div class="mut">acertos</div></div>
+</div>
+<div class="card">
+<div class="rowb" style="gap:10px"><div class="ico"><i class="ti ti-chart-bar" aria-hidden="true"></i></div><div><div class="t">Páginas por dia</div><div class="mut">hoje em destaque</div></div></div>
+<div class="brs" id="bars2" style="margin-top:12px"></div>
+</div>
+<div class="card">
+<div class="rowb" style="gap:10px"><div class="ico"><i class="ti ti-school" aria-hidden="true"></i></div><div><div class="t">Questões por matéria</div><div class="mut">percentual de acertos</div></div></div>
+<div id="subj2" style="margin-top:6px"></div>
+</div>
+<button class="ob" style="margin:16px 16px 0;width:calc(100% - 32px)" onclick="logout()">Sair da conta</button>
+</div>
+
+</div>
+
+<div class="nav">
+<button id="n-hoje" onclick="tab('hoje')"><i class="ti ti-home" aria-hidden="true"></i>Hoje</button>
+<button id="n-leitura" class="on" onclick="tab('leitura')"><i class="ti ti-book" aria-hidden="true"></i>Leitura</button>
+<button id="n-conc" onclick="tab('conc')"><i class="ti ti-school" aria-hidden="true"></i>Concursos</button>
+<button id="n-est" onclick="tab('est')"><i class="ti ti-feather" aria-hidden="true"></i>Estúdio</button>
+<button id="n-prog" onclick="tab('prog')"><i class="ti ti-chart-pie" aria-hidden="true"></i>Progresso</button>
+</div>
+
+<div class="scrim" id="scrim" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="sf" style="font-size:20px;font-style:italic">Registrar leitura</span><button class="ib" onclick="closeSheet()" aria-label="Fechar"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+<div class="mut" style="margin-top:12px">O que você leu?</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px" id="types">
+<button class="ch sel" onclick="pickType(this,'Livro')">Livro</button>
+<button class="ch" onclick="pickType(this,'Ebook')">Ebook</button>
+<button class="ch" onclick="pickType(this,'Artigo')">Artigo</button>
+<button class="ch" onclick="pickType(this,'HQ')">HQ</button>
+</div>
+<div class="mut" style="margin-top:16px">Quantas páginas?</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:22px;margin-top:8px">
+<button class="ob" style="width:52px;margin:0;font-size:22px;padding:8px" onclick="stepAmt(-5)" aria-label="Menos 5">−</button>
+<span class="sf" style="font-size:44px;min-width:70px;text-align:center" id="amt">10</span>
+<button class="ob" style="width:52px;margin:0;font-size:22px;padding:8px" onclick="stepAmt(5)" aria-label="Mais 5">+</button>
+</div>
+<button class="pb" style="margin-top:18px" onclick="logPages()">Registrar</button>
+</div>
+</div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
