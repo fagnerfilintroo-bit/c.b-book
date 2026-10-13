@@ -169,7 +169,6 @@ function saveNewBook(){
     toast('Livro adicionado com sucesso!');
   }
 
-  // Recalcula o total geral com base na soma dos livros ou mantém atualizado
   recalculateTotalPages();
   save();
   renderBooks();
@@ -345,14 +344,26 @@ function logPages(){
 function updateUI(){
   document.getElementById('hi-name').textContent = 'Olá, ' + (state.name || 'Fagner') + '.';
   document.getElementById('hi-pages').textContent = state.pages;
-  let pct = Math.round((state.pages / state.goal) * 100);
+  
+  let pct = Math.min(100, Math.round((state.pages / state.goal) * 100));
   document.getElementById('hi-bpct').textContent = pct + '%';
+  
+  // Atualiza o gráfico circular
+  let donutPath = document.getElementById('donut-path');
+  let donutPct = document.getElementById('donut-pct');
+  let donutDesc = document.getElementById('donut-desc');
+  
+  if(donutPath) donutPath.setAttribute('stroke-dasharray', `${pct}, 100`);
+  if(donutPct) donutPct.textContent = pct + '%';
+  if(donutDesc) donutDesc.textContent = `${state.pages} de ${state.goal} páginas da meta alcançadas.`;
+
   let stkEl = document.querySelector('.stk');
   if(stkEl) stkEl.textContent = state.streak;
   let mailEl = document.getElementById('pg-mail');
   if(mailEl) mailEl.textContent = state.email;
   let totalInput = document.getElementById('pg-edit-total');
   if(totalInput) totalInput.value = state.pages;
+  
   updateActiveBookDisplay();
 }
 
