@@ -108,6 +108,7 @@ function openBookModal(id = null){
   let titleInput = document.getElementById('bk-title');
   let authorInput = document.getElementById('bk-author');
   let pagesInput = document.getElementById('bk-pages');
+  let pagesReadInput = document.getElementById('bk-pages-read');
   let coverInput = document.getElementById('bk-cover');
   let modalTitle = document.getElementById('book-modal-title');
 
@@ -118,6 +119,7 @@ function openBookModal(id = null){
       titleInput.value = book.title;
       authorInput.value = book.author;
       pagesInput.value = book.total;
+      pagesReadInput.value = book.pages;
       coverInput.value = book.cover || '';
     }
   } else {
@@ -125,6 +127,7 @@ function openBookModal(id = null){
     titleInput.value = '';
     authorInput.value = '';
     pagesInput.value = '';
+    pagesReadInput.value = '0';
     coverInput.value = '';
   }
 
@@ -136,6 +139,7 @@ function saveNewBook(){
   let title = document.getElementById('bk-title').value;
   let author = document.getElementById('bk-author').value;
   let pages = parseInt(document.getElementById('bk-pages').value) || 100;
+  let pagesRead = parseInt(document.getElementById('bk-pages-read').value) || 0;
   let cover = document.getElementById('bk-cover').value;
 
   if(!title){ toast('Digite o título do livro'); return; }
@@ -148,6 +152,7 @@ function saveNewBook(){
       book.title = title;
       book.author = author || 'Desconhecido';
       book.total = pages;
+      book.pages = Math.min(pages, pagesRead);
       book.cover = cover;
     }
     toast('Livro atualizado com sucesso!');
@@ -156,7 +161,7 @@ function saveNewBook(){
       id: Date.now(),
       title: title,
       author: author || 'Desconhecido',
-      pages: 0,
+      pages: Math.min(pages, pagesRead),
       total: pages,
       cover: cover,
       notes: ''
@@ -181,10 +186,15 @@ function renderBooks(){
 
   container.innerHTML = state.books.map(b => {
     let pct = Math.round((b.pages / b.total) * 100) || 0;
+    let isFinished = b.pages >= b.total;
+    
     return `
-      <div class="card" style="margin:0 0 10px 0">
+      <div class="card" style="margin:0 0 10px 0;position:relative;overflow:hidden">
         <div style="display:flex;gap:14px;align-items:center">
-          <div class="bk" style="${b.cover ? 'background-image:url('+b.cover+');background-size:cover;' : ''}">${b.cover ? '' : b.title.charAt(0)}</div>
+          <div class="bk" style="position:relative;${b.cover ? 'background-image:url('+b.cover+');background-size:cover;' : ''}">
+            ${b.cover ? '' : b.title.charAt(0)}
+            ${isFinished ? '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(234,179,8,0.9);color:#060e1e;font-size:9px;font-weight:800;text-align:center;padding:1px 0;letter-spacing:0.05em">LIDO</div>' : ''}
+          </div>
           <div style="flex:1;min-width:0">
             <div class="t" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.title}</div>
             <div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.author}</div>
