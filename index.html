@@ -214,7 +214,14 @@
 <div class="card">
 <div class="t">Sua conta</div>
 <div class="mut" id="pg-mail" style="margin-top:4px"></div>
-<button class="ob" style="margin-top:12px" onclick="logout()">Sair</button>
+<div style="margin-top:14px">
+<div class="mut" style="font-size:11px">Editar Total Geral de Páginas Lidas:</div>
+<div style="display:flex;gap:8px;margin-top:6px">
+<input class="ip" id="pg-edit-total" type="number" placeholder="Total geral" style="margin:0">
+<button class="pb" style="margin:0;width:100px;padding:8px;font-size:12px" onclick="saveTotalPages()">Atualizar</button>
+</div>
+</div>
+<button class="ob" style="margin-top:16px" onclick="logout()">Sair</button>
 </div>
 </div>
 
