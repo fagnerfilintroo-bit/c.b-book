@@ -29,7 +29,7 @@ body {
   overflow: hidden;
 }
 
-/* Moldura Principal Mobile */
+/* Moldura Principal Mobile Centralizada */
 .ph {
   width: 100%;
   max-width: 480px;
@@ -40,6 +40,7 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 
 @media(min-width: 481px) {
@@ -50,10 +51,11 @@ body {
   }
 }
 
-/* Container de Telas */
+/* Container de Telas (Ocupa o espaço central perfeitamente) */
 .sc {
   position: absolute;
   inset: 0;
+  bottom: 76px; /* Deixa a área da navbar livre */
   display: none;
   flex-direction: column;
   background-color: var(--bg-main);
@@ -65,13 +67,14 @@ body {
 }
 
 .pad {
-  padding: 20px;
+  padding: 24px 20px;
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center; /* Centraliza verticalmente nas telas de login/planos */
 }
 
-/* Área de Conteúdo com Rolagem Perfeita e Respiro para a Navbar */
+/* Área de Conteúdo Rolável */
 .views {
   flex: 1;
   position: relative;
@@ -86,7 +89,8 @@ body {
   overflow-y: auto;
   display: none;
   flex-direction: column;
-  padding-bottom: 110px; /* Garante que o conteúdo role livremente sem ficar debaixo da barra fixa */
+  padding-top: 10px;
+  padding-bottom: 24px; /* Respiro interno para o final rolar limpo */
 }
 .v.act {
   display: flex;
@@ -99,7 +103,7 @@ body {
 .mut { color: var(--text-muted); font-size: 13px; line-height: 1.4; }
 .t { font-weight: 700; color: #fff; font-size: 15px; }
 
-/* Cards */
+/* Cards perfeitamente alinhados */
 .card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -157,12 +161,8 @@ body {
   align-items: center;
   gap: 6px;
   box-shadow: 0 4px 12px rgba(37, 137, 254, 0.3);
-  transition: background-color 0.2s, transform 0.1s;
 }
-.btn-launch:active {
-  transform: scale(0.96);
-  background-color: var(--blue-hover);
-}
+.btn-launch:active { transform: scale(0.96); }
 
 .pb {
   background-color: var(--blue-primary);
@@ -247,44 +247,44 @@ textarea.ip { resize: none; min-height: 120px; }
   flex-shrink: 0;
 }
 
-/* NAVBAR FIXA E FLUTUANTE NA PARTE INFERIOR */
+/* NAVBAR FLUTUANTE PERFEITAMENTE CENTRALIZADA NO RODAPÉ */
 .nav {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
-  right: 12px;
-  height: 64px;
-  background-color: rgba(13, 23, 42, 0.95);
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
+  height: 62px;
+  background-color: rgba(13, 23, 42, 0.96);
   backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
   border-radius: 20px;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  z-index: 30; /* Fica fixada acima de todo o conteúdo rolável */
+  z-index: 30;
   padding: 0 6px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
 .nav button {
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   cursor: pointer;
-  height: 48px;
+  height: 50px;
   flex: 1;
   border-radius: 14px;
   transition: all 0.2s ease;
 }
 
-.nav button i { font-size: 20px; }
+.nav button i { font-size: 19px; }
 
 .nav button.on {
   background-color: var(--blue-primary);
