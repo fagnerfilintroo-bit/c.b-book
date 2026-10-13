@@ -113,7 +113,7 @@
 <div class="sc" id="s-app">
 <div class="views">
 
-<!-- INÍCIO (PRIMEIRA TELA DO APP COM A CARAVELA AO FUNDO) -->
+<!-- INÍCIO -->
 <div class="v act" id="v-hoje">
 <svg class="bg-ship" viewBox="0 0 240 160" aria-hidden="true"><use href="#cvg"/></svg>
 
@@ -126,10 +126,11 @@
 <button class="btn-launch" onclick="openSheet()"><i class="ti ti-plus"></i> Registrar</button>
 </div>
 
+<!-- Painel de Progreso com Gráfico e Anel -->
 <div class="card">
 <div style="display:flex;justify-content:space-between;align-items:center">
-<span class="mut" style="font-size:12px">Páginas lidas hoje</span>
-<span class="badge" style="background:rgba(34,197,94,0.15);color:var(--green-accent);border:none">• atualizado</span>
+<span class="mut" style="font-size:12px">Painel de Progresso (7 dias)</span>
+<span class="badge" style="background:rgba(34,197,94,0.15);color:var(--green-accent);border:none">• ativo</span>
 </div>
 <div style="display:flex;align-items:baseline;gap:8px;margin-top:6px">
 <span class="sf" style="font-size:38px" id="hi-pages">0</span>
@@ -142,7 +143,7 @@
 <div class="sf" style="font-size:15px;color:var(--blue-primary);margin-top:2px"><span class="stk">0</span> dias seguidos</div>
 </div>
 <div style="flex:1">
-<div class="mut" style="font-size:11px">Progresso da meta</div>
+<div class="mut" style="font-size:11px">Meta Diária</div>
 <div class="sf" style="font-size:15px;color:var(--green-accent);margin-top:2px" id="hi-bpct">0%</div>
 </div>
 </div>
@@ -152,10 +153,10 @@
 <div class="bk"><span id="ac-cover">D</span></div>
 <div style="flex:1;min-width:0">
 <div class="mut" style="font-size:11px">LIVRO EM ANDAMENTO</div>
-<div class="t" id="hi-book" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Dom Casmurro</div>
-<div class="mut" id="hi-author" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Machado de Assis</div>
+<div class="t" id="hi-book" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Nenhum livro</div>
+<div class="mut" id="hi-author" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Adicione na aba Leitura</div>
 </div>
-<button class="ib" onclick="openSheet()"><i class="ti ti-chevron-right"></i></button>
+<button class="ib" onclick="tab('leitura')"><i class="ti ti-chevron-right"></i></button>
 </div>
 
 <div class="card">
@@ -185,12 +186,12 @@
 
 <!-- ABA LEITURA -->
 <div class="v" id="v-leitura">
-<div style="padding:20px 20px 10px"><div class="wm">Leitura</div></div>
-<div class="card">
-<div class="t" id="lv-title">Dom Casmurro</div>
-<div class="mut" id="lv-author">Machado de Assis</div>
-<div class="mut" style="margin-top:10px" id="lv-txt">p. 0 de 256</div>
-<button class="pb" onclick="openSheet()">Registrar leitura</button>
+<div style="padding:20px 20px 10px;display:flex;justify-content:space-between;align-items:center">
+<div class="wm">Leitura</div>
+<button class="btn-launch" onclick="openBookModal()"><i class="ti ti-plus"></i> Novo Livro</button>
+</div>
+<div class="list" id="books-list" style="margin-top:10px">
+<!-- Livros dinâmicos aparecem aqui -->
 </div>
 </div>
 
@@ -240,6 +241,15 @@
 <button class="ob" style="width:44px;margin:0;font-size:18px" onclick="stepAmt(5)">+</button>
 </div>
 <button class="pb" style="margin-top:20px" onclick="logPages()">Confirmar</button>
+</div>
+
+<div class="sheet" id="book-sheet">
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="sf" style="font-size:18px">Adicionar Novo Livro</span><button class="ib" onclick="closeSheets()"><i class="ti ti-x"></i></button></div>
+<input class="ip" id="bk-title" placeholder="Título do livro">
+<input class="ip" id="bk-author" placeholder="Autor">
+<input class="ip" id="bk-pages" type="number" placeholder="Total de páginas">
+<input class="ip" id="bk-cover" placeholder="URL da capa (opcional)">
+<button class="pb" style="margin-top:20px" onclick="saveNewBook()">Salvar Livro</button>
 </div>
 
 <div class="sheet" id="ed">
