@@ -109,19 +109,16 @@ function openBookModal(id = null){
   let authorInput = document.getElementById('bk-author');
   let pagesInput = document.getElementById('bk-pages');
   let coverInput = document.getElementById('bk-cover');
-  let modalTitle = document.getElementById('book-modal-title');
 
   if(id !== null && state.books){
     let book = state.books.find(b => b.id === id);
     if(book){
-      modalTitle.textContent = 'Editar Livro';
       titleInput.value = book.title;
       authorInput.value = book.author;
       pagesInput.value = book.total;
       coverInput.value = book.cover || '';
     }
   } else {
-    modalTitle.textContent = 'Adicionar Novo Livro';
     titleInput.value = '';
     authorInput.value = '';
     pagesInput.value = '';
