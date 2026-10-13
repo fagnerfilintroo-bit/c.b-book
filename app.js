@@ -1,134 +1,241 @@
-var KEY = 'cbbook_v1';
-var S;
-var T = {type:'Livro', amt:10, terms:true, qa:false, qsel:-1};
-var tmr, edIdx = -1;
-
-function $(id){ return document.getElementById(id); }
+var KEY = 'cbbook_v3';
+var state = load() || fresh();
 
 function fresh(){
   return {
-    v:1, logged:false, name:'Fagner', email:'fagner@exemplo.com', plan:1, ints:[],
+    v:1, logged:false, name:'', email:'', plan:0, ints:[],
     pages:0, goal:30, streak:0, hit:false, words:0,
-    book:{t:'Dom Casmurro', a:'Machado de Assis', p:0, total:256},
+    books: [],
     qd:0, qt:0, qr:0, qi:0, erros:[], sub:{}, lastSub:'',
-    ch:[{t:'Capítulo 1', x:''}]
+    ch:[]
   };
 }
 
-function load(){
-  try{
-    var r = localStorage.getItem(KEY);
-    if(r){ S = Object.assign(fresh(), JSON.parse(r)); return; }
-  }catch(e){}
-  S = fresh();
+function save(){
+  localStorage.setItem(KEY, JSON.stringify(state));
 }
 
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function load(){
+  let d = localStorage.getItem(KEY);
+  return d ? JSON.parse(d) : null;
+}
+
+function toast(msg){
+  let t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('act');
+  setTimeout(() => t.classList.remove('act'), 2500);
+}
 
 function go(id){
-  document.querySelectorAll('.sc').forEach(s => s.classList.remove('act'));
-  $(id).classList.add('act');
+  document.querySelectorAll('.sc').forEach(el => el.classList.remove('act'));
+  let target = document.getElementById(id);
+  if(target) target.classList.add('act');
 }
 
-function tab(n){
-  document.querySelectorAll('.v').forEach(v => v.classList.remove('act'));
-  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('on'));
+function tab(name){
+  document.querySelectorAll('.v').forEach(el => el.classList.remove('act'));
+  document.querySelectorAll('.nav button').forEach(el => el.classList.remove('on'));
   
-  var targetV = $('v-' + n);
-  var targetN = $('n-' + n);
-  if(targetV) targetV.classList.add('act');
-  if(targetN) targetN.classList.add('on');
+  let v = document.getElementById('v-' + name);
+  let btn = document.getElementById('n-' + name);
+  if(v) v.classList.add('act');
+  if(btn) btn.classList.add('on');
 }
 
-function toast(m){
-  var t = $('toast');
-  t.textContent = m;
-  t.classList.add('act');
-  clearTimeout(tmr);
-  tmr = setTimeout(function(){ t.classList.remove('act'); }, 2200);
+function login(){
+  let m = document.getElementById('lg-mail').value;
+  let p = document.getElementById('lg-pass').value;
+  if(!m || !p){ toast('Preencha e-mail e senha'); return; }
+  state.logged = true;
+  state.email = m;
+  state.name = m.split('@')[0];
+  state.name = state.name.charAt(0).toUpperCase() + state.name.slice(1);
+  save();
+  initApp();
+  go('s-app');
 }
 
+function signup(){
+  let n = document.getElementById('su-name').value;
+  let m = document.getElementById('su-mail').value;
+  let p = document.getElementById('su-pass').value;
+  if(!n || !m || !p){ toast('Preencha todos os campos'); return; }
+  state.name = n;
+  state.email = m;
+  save();
+  go('s-plan');
+}
+
+function selPlan(idx){
+  state.plan = idx;
+  document.getElementById('p0').style.borderColor = idx === 0 ? 'var(--blue-primary)' : 'var(--border-color)';
+  document.getElementById('p1').style.borderColor = idx === 1 ? 'var(--blue-primary)' : 'var(--border-color)';
+  document.getElementById('planbtn').textContent = idx === 1 ? 'Continuar com Leitor' : 'Continuar Gratuito';
+}
+
+function tgInt(btn){
+  btn.classList.toggle('sel');
+  let txt = btn.textContent;
+  if(!state.ints) state.ints = [];
+  if(state.ints.includes(txt)){
+    state.ints = state.ints.filter(i => i !== txt);
+  } else {
+    state.ints.push(txt);
+  }
+  document.getElementById('intcount').textContent = state.ints.length + ' selecionados';
+}
+
+function enterApp(){
+  state.logged = true;
+  save();
+  initApp();
+  go('s-app');
+}
+
+function logout(){
+  localStorage.removeItem(KEY);
+  state = fresh();
+  go('s-login');
+}
+
+// Livros
+function openBookModal(){
+  document.getElementById('scrim').classList.add('act');
+  document.getElementById('book-sheet').classList.add('act');
+}
+
+function saveNewBook(){
+  let title = document.getElementById('bk-title').value;
+  let author = document.getElementById('bk-author').value;
+  let pages = parseInt(document.getElementById('bk-pages').value) || 100;
+  let cover = document.getElementById('bk-cover').value;
+
+  if(!title){ toast('Digite o título do livro'); return; }
+
+  if(!state.books) state.books = [];
+
+  state.books.push({
+    id: Date.now(),
+    title: title,
+    author: author || 'Desconhecido',
+    pages: 0,
+    total: pages,
+    cover: cover
+  });
+
+  save();
+  renderBooks();
+  updateActiveBookDisplay();
+  closeSheets();
+  toast('Livro adicionado com sucesso!');
+
+  document.getElementById('bk-title').value = '';
+  document.getElementById('bk-author').value = '';
+  document.getElementById('bk-pages').value = '';
+  document.getElementById('bk-cover').value = '';
+}
+
+function renderBooks(){
+  let container = document.getElementById('books-list');
+  if(!container) return;
+
+  if(!state.books || state.books.length === 0){
+    container.innerHTML = `<div class="card"><div class="mut">Nenhum livro cadastrado ainda. Clique em "Novo Livro" acima.</div></div>`;
+    return;
+  }
+
+  container.innerHTML = state.books.map(b => {
+    let pct = Math.round((b.pages / b.total) * 100) || 0;
+    return `
+      <div class="card" style="display:flex;gap:14px;align-items:center;margin:0 0 10px 0">
+        <div class="bk" style="${b.cover ? 'background-image:url('+b.cover+');background-size:cover;' : ''}">${b.cover ? '' : b.title.charAt(0)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="t" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.title}</div>
+          <div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.author}</div>
+          <div class="mut" style="margin-top:4px">Progresso: ${b.pages} / ${b.total} pág (${pct}%)</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateActiveBookDisplay(){
+  if(state.books && state.books.length > 0){
+    let active = state.books[0];
+    document.getElementById('hi-book').textContent = active.title;
+    document.getElementById('hi-author').textContent = active.author;
+    document.getElementById('ac-cover').textContent = active.cover ? '' : active.title.charAt(0);
+    if(active.cover){
+      document.getElementById('ac-cover').style.backgroundImage = 'url('+active.cover+')';
+      document.getElementById('ac-cover').style.backgroundSize = 'cover';
+    }
+  } else {
+    document.getElementById('hi-book').textContent = 'Nenhum livro';
+    document.getElementById('hi-author').textContent = 'Adicione na aba Leitura';
+    document.getElementById('ac-cover').textContent = '0';
+  }
+}
+
+// Registro de Leitura
+let currentAdd = 10;
 function openSheet(){
-  $('scrim').classList.add('act');
-  $('sheet').classList.add('act');
-}
-
-function openEd(i){
-  edIdx = i;
-  var c = i >= 0 ? S.ch[i] : {t:'Capítulo ' + (S.ch.length + 1), x:''};
-  $('edt').value = c.t;
-  $('edx').value = c.x;
-  edCount();
-  $('scrim').classList.add('act');
-  $('ed').classList.add('act');
+  document.getElementById('scrim').classList.add('act');
+  document.getElementById('sheet').classList.add('act');
 }
 
 function closeSheets(){
-  $('scrim').classList.remove('act');
-  $('sheet').classList.remove('act');
-  $('ed').classList.remove('act');
+  document.getElementById('scrim').classList.remove('act');
+  document.getElementById('sheet').classList.remove('act');
+  document.getElementById('book-sheet').classList.remove('act');
+  document.getElementById('ed').classList.remove('act');
 }
 
-function stepAmt(d){
-  T.amt = Math.max(5, T.amt + d);
-  $('amt').textContent = T.amt;
+function stepAmt(delta){
+  currentAdd = Math.max(5, currentAdd + delta);
+  document.getElementById('amt').textContent = currentAdd;
 }
 
 function logPages(){
-  S.pages += T.amt;
-  S.book.p = Math.min(S.book.total, S.book.p + T.amt);
+  state.pages += currentAdd;
+  state.streak = 1;
+  let pct = Math.round((state.pages / state.goal) * 100);
+  
+  if(state.books && state.books.length > 0){
+    state.books[0].pages = Math.min(state.books[0].total, state.books[0].pages + currentAdd);
+  }
+
   save();
-  render();
+  updateUI();
+  renderBooks();
   closeSheets();
-  toast('+' + T.amt + ' páginas registradas!');
+  toast('Leitura registrada com sucesso!');
 }
 
-function edCount(){
-  var m = String($('edx').value || '').trim().match(/\S+/g);
-  $('edc').textContent = (m ? m.length : 0) + ' palavras';
+function updateUI(){
+  document.getElementById('hi-name').textContent = 'Olá, ' + (state.name || 'Fagner') + '.';
+  document.getElementById('hi-pages').textContent = state.pages;
+  let pct = Math.round((state.pages / state.goal) * 100);
+  document.getElementById('hi-bpct').textContent = pct + '%';
+  document.querySelector('.stk').textContent = state.streak;
+  document.getElementById('pg-mail').textContent = state.email;
+  updateActiveBookDisplay();
 }
 
-function edSave(){
-  if(edIdx < 0){ S.ch.push({t:'', x:''}); edIdx = S.ch.length - 1; }
-  S.ch[edIdx].t = $('edt').value.trim() || ('Capítulo ' + (edIdx + 1));
-  S.ch[edIdx].x = $('edx').value;
-  save();
-  closeSheets();
-  render();
-  toast('Capítulo salvo!');
+function initApp(){
+  updateUI();
+  renderBooks();
+  if(state.logged){
+    go('s-app');
+  }
 }
 
-function login(){ enterApp(); }
-function signup(){ go('s-plan'); }
-function selPlan(n){ S.plan = n; }
-function enterApp(){ S.logged = true; save(); go('s-app'); tab('hoje'); render(); }
-function logout(){ S.logged = false; save(); go('s-login'); }
-
-function render(){
-  $('hi-name').textContent = S.name ? 'Olá, ' + S.name.split(' ')[0] + '.' : 'Olá!';
-  $('hi-pages').textContent = S.pages;
-  $('hi-book').textContent = S.book.t;
-  $('hi-author').textContent = S.book.a;
-  
-  var bp = Math.round((S.pages / S.goal) * 100);
-  $('hi-bpct').textContent = bp + '%';
-  $('ac-cover').textContent = S.book.t.charAt(0);
-  
-  $('lv-title').textContent = S.book.t;
-  $('lv-author').textContent = S.book.a;
-  $('lv-txt').textContent = 'p. ' + S.book.p + ' de ' + S.book.total;
-  
-  document.querySelectorAll('.stk').forEach(e => e.textContent = S.streak);
-  
-  var acc = S.qt ? Math.round(100 * S.qr / S.qt) : 0;
-  $('qacc').textContent = acc + '%';
-  $('pg-mail').textContent = S.email;
-}
-
-function init(){
-  load();
-  render();
-  if(S.logged){ go('s-app'); tab('hoje'); }
-}
-
-init();
+window.onload = function(){
+  if(state.logged){
+    go('s-app');
+    initApp();
+  } else {
+    go('s-login');
+  }
+};
