@@ -71,7 +71,7 @@ body {
   flex-direction: column;
 }
 
-/* Área de Conteúdo com Rolagem Perfeita */
+/* Área de Conteúdo com Rolagem Perfeita e Respiro para a Navbar */
 .views {
   flex: 1;
   position: relative;
@@ -86,7 +86,7 @@ body {
   overflow-y: auto;
   display: none;
   flex-direction: column;
-  padding-bottom: 110px; /* Respiro para a rolagem passar da navbar sem cobrir nada */
+  padding-bottom: 110px; /* Garante que o conteúdo role livremente sem ficar debaixo da barra fixa */
 }
 .v.act {
   display: flex;
@@ -99,7 +99,7 @@ body {
 .mut { color: var(--text-muted); font-size: 13px; line-height: 1.4; }
 .t { font-weight: 700; color: #fff; font-size: 15px; }
 
-/* Cards Identicos à Referência */
+/* Cards */
 .card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -143,7 +143,7 @@ body {
 }
 .ar:hover, .pr:hover { background-color: var(--bg-card-alt); }
 
-/* Botão Principal Estilo (+ Lançamento) */
+/* Botões */
 .btn-launch {
   background-color: var(--blue-primary);
   color: #ffffff;
@@ -247,7 +247,7 @@ textarea.ip { resize: none; min-height: 120px; }
   flex-shrink: 0;
 }
 
-/* Navbar Flutuante Estilo NORA / Financeiro */
+/* NAVBAR FIXA E FLUTUANTE NA PARTE INFERIOR */
 .nav {
   position: absolute;
   bottom: 12px;
@@ -261,7 +261,7 @@ textarea.ip { resize: none; min-height: 120px; }
   display: flex;
   justify-content: space-around;
   align-items: center;
-  z-index: 30;
+  z-index: 30; /* Fica fixada acima de todo o conteúdo rolável */
   padding: 0 6px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
@@ -286,16 +286,13 @@ textarea.ip { resize: none; min-height: 120px; }
 
 .nav button i { font-size: 20px; }
 
-/* Item Selecionado com Pill Azul (Igual ao Print) */
 .nav button.on {
   background-color: var(--blue-primary);
   color: #ffffff;
   font-weight: 700;
 }
 
-/* ========================================================= */
-/* CORREÇÃO DEFINITIVA DO BUG DA CAIXA DE CAPÍTULOS / MODAIS */
-/* ========================================================= */
+/* MODAIS E CAIXAS */
 .sheet {
   position: absolute;
   bottom: 0;
@@ -306,9 +303,6 @@ textarea.ip { resize: none; min-height: 120px; }
   border-radius: 28px 28px 0 0;
   padding: 24px;
   z-index: 100;
-
-  /* MANTÉM 100% FORA DA TELA POR PADRÃO */
-  display: block !important;
   visibility: hidden;
   opacity: 0;
   transform: translateY(100%) !important;
@@ -316,7 +310,6 @@ textarea.ip { resize: none; min-height: 120px; }
   box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.9);
 }
 
-/* SÓ EXIBE QUANDO A CLASSE DE ATIVAÇÃO FOR ADICIONADA */
 .sheet.act, .sheet.show {
   visibility: visible !important;
   opacity: 1 !important;
@@ -338,7 +331,6 @@ textarea.ip { resize: none; min-height: 120px; }
   opacity: 1 !important;
 }
 
-/* Elementos auxiliares */
 .ch {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
