@@ -149,6 +149,24 @@
 </div>
 </div>
 
+<!-- GRÁFICO CIRCULAR DE DESEMPENHO -->
+<div class="card" style="display:flex;align-items:center;gap:20px;">
+<div style="position:relative;width:80px;height:80px;flex-shrink:0;">
+<svg width="80" height="80" viewBox="0 0 36 36" style="transform:rotate(-90deg)">
+<path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--border-color)" stroke-width="3.5" />
+<path id="donut-path" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--blue-primary)" stroke-width="3.5" stroke-dasharray="0, 100" stroke-linecap="round" />
+</svg>
+<div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+<span class="sf" id="donut-pct" style="font-size:15px">0%</span>
+</div>
+</div>
+<div style="flex:1;min-width:0">
+<div class="mut" style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em">DESEMPENHO DA META</div>
+<div class="t" style="margin-top:2px;font-size:15px">Constância de Leitura</div>
+<div class="mut" style="margin-top:4px;font-size:12px" id="donut-desc">0 de 30 páginas da meta semanal alcançadas.</div>
+</div>
+</div>
+
 <div class="card" style="display:flex;gap:14px;align-items:center">
 <div class="bk"><span id="ac-cover">D</span></div>
 <div style="flex:1;min-width:0">
@@ -157,19 +175,6 @@
 <div class="mut" id="hi-author" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Adicione na aba Leitura</div>
 </div>
 <button class="ib" onclick="tab('leitura')"><i class="ti ti-chevron-right"></i></button>
-</div>
-
-<div class="card">
-<div class="mut" style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em">DESEMPENHO</div>
-<div class="t" style="margin-top:2px">Concursos & Questões</div>
-<div style="display:flex;align-items:baseline;gap:6px;margin-top:6px">
-<span class="sf" style="font-size:26px" id="qacc">0%</span>
-<span class="mut">de acertos</span>
-</div>
-<div style="display:flex;gap:8px;margin-top:14px">
-<button class="ob" style="flex:1;margin:0;padding:8px;font-size:12px" onclick="tab('conc')">Praticar</button>
-<button class="ob" style="flex:1;margin:0;padding:8px;font-size:12px" onclick="tab('conc')">Caderno de Erros</button>
-</div>
 </div>
 
 <div class="card">
