@@ -100,8 +100,34 @@ function logout(){
   go('s-login');
 }
 
-// Livros
-function openBookModal(){
+// Livros (Adicionar e Editar)
+let editingBookId = null;
+
+function openBookModal(id = null){
+  editingBookId = id;
+  let titleInput = document.getElementById('bk-title');
+  let authorInput = document.getElementById('bk-author');
+  let pagesInput = document.getElementById('bk-pages');
+  let coverInput = document.getElementById('bk-cover');
+  let modalTitle = document.getElementById('book-modal-title');
+
+  if(id !== null && state.books){
+    let book = state.books.find(b => b.id === id);
+    if(book){
+      modalTitle.textContent = 'Editar Livro';
+      titleInput.value = book.title;
+      authorInput.value = book.author;
+      pagesInput.value = book.total;
+      coverInput.value = book.cover || '';
+    }
+  } else {
+    modalTitle.textContent = 'Adicionar Novo Livro';
+    titleInput.value = '';
+    authorInput.value = '';
+    pagesInput.value = '';
+    coverInput.value = '';
+  }
+
   document.getElementById('scrim').classList.add('act');
   document.getElementById('book-sheet').classList.add('act');
 }
@@ -116,25 +142,31 @@ function saveNewBook(){
 
   if(!state.books) state.books = [];
 
-  state.books.push({
-    id: Date.now(),
-    title: title,
-    author: author || 'Desconhecido',
-    pages: 0,
-    total: pages,
-    cover: cover
-  });
+  if(editingBookId !== null){
+    let book = state.books.find(b => b.id === editingBookId);
+    if(book){
+      book.title = title;
+      book.author = author || 'Desconhecido';
+      book.total = pages;
+      book.cover = cover;
+    }
+    toast('Livro atualizado com sucesso!');
+  } else {
+    state.books.push({
+      id: Date.now(),
+      title: title,
+      author: author || 'Desconhecido',
+      pages: 0,
+      total: pages,
+      cover: cover
+    });
+    toast('Livro adicionado com sucesso!');
+  }
 
   save();
   renderBooks();
   updateActiveBookDisplay();
   closeSheets();
-  toast('Livro adicionado com sucesso!');
-
-  document.getElementById('bk-title').value = '';
-  document.getElementById('bk-author').value = '';
-  document.getElementById('bk-pages').value = '';
-  document.getElementById('bk-cover').value = '';
 }
 
 function renderBooks(){
@@ -156,6 +188,7 @@ function renderBooks(){
           <div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.author}</div>
           <div class="mut" style="margin-top:4px">Progresso: ${b.pages} / ${b.total} pág (${pct}%)</div>
         </div>
+        <button class="ib" onclick="openBookModal(${b.id})" title="Editar"><i class="ti ti-pencil"></i></button>
       </div>
     `;
   }).join('');
@@ -200,7 +233,6 @@ function stepAmt(delta){
 function logPages(){
   state.pages += currentAdd;
   state.streak = 1;
-  let pct = Math.round((state.pages / state.goal) * 100);
   
   if(state.books && state.books.length > 0){
     state.books[0].pages = Math.min(state.books[0].total, state.books[0].pages + currentAdd);
