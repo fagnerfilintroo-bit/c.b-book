@@ -169,10 +169,30 @@ function saveNewBook(){
     toast('Livro adicionado com sucesso!');
   }
 
+  // Recalcula o total geral com base na soma dos livros ou mantém atualizado
+  recalculateTotalPages();
   save();
   renderBooks();
   updateActiveBookDisplay();
   closeSheets();
+}
+
+function recalculateTotalPages(){
+  if(state.books && state.books.length > 0){
+    state.pages = state.books.reduce((sum, b) => sum + (b.pages || 0), 0);
+  }
+}
+
+function saveTotalPages(){
+  let inputVal = parseInt(document.getElementById('pg-edit-total').value);
+  if(!isNaN(inputVal)){
+    state.pages = Math.max(0, inputVal);
+    save();
+    updateUI();
+    toast('Total de páginas atualizado!');
+  } else {
+    toast('Digite um número válido');
+  }
 }
 
 function renderBooks(){
@@ -312,7 +332,7 @@ function logPages(){
   }
 
   book.pages = Math.min(book.total, book.pages + currentAdd);
-  state.pages += currentAdd;
+  recalculateTotalPages();
   state.streak = 1;
 
   save();
@@ -331,6 +351,8 @@ function updateUI(){
   if(stkEl) stkEl.textContent = state.streak;
   let mailEl = document.getElementById('pg-mail');
   if(mailEl) mailEl.textContent = state.email;
+  let totalInput = document.getElementById('pg-edit-total');
+  if(totalInput) totalInput.value = state.pages;
   updateActiveBookDisplay();
 }
 
