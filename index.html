@@ -259,8 +259,12 @@
 <div style="display:flex;justify-content:space-between;align-items:center"><span class="sf" id="book-modal-title" style="font-size:18px">Adicionar Novo Livro</span><button class="ib" onclick="closeSheets()"><i class="ti ti-x"></i></button></div>
 <input class="ip" id="bk-title" placeholder="Título do livro">
 <input class="ip" id="bk-author" placeholder="Autor">
-<input class="ip" id="bk-pages" type="number" placeholder="Total de páginas">
-<input class="ip" id="bk-cover" placeholder="URL da capa (opcional)">
+<div class="mut" style="margin-top:8px;font-size:12px">Páginas lidas atuais e Total:</div>
+<div style="display:flex;gap:8px">
+<input class="ip" id="bk-pages-read" type="number" placeholder="Lidas (ex: 0)">
+<input class="ip" id="bk-pages" type="number" placeholder="Total">
+</div>
+<input class="ip" id="bk-cover" placeholder="URL da capa (opcional)" style="margin-top:8px">
 <button class="pb" style="margin-top:20px" onclick="saveNewBook()">Salvar Livro</button>
 </div>
 
