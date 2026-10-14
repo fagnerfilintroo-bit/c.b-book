@@ -301,13 +301,12 @@ function renderFriends(){
     return;
   }
 
-  // Ordena por páginas lidas (Disputa/Regatta)
   let sorted = [...state.friends].sort((a,b) => b.pages - a.pages);
 
   list.innerHTML = sorted.map((f, idx) => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-color)">
       <div>
-        <div style="font-weight:700;font-size:14px;color:var(--text-main)">${idx === 1 ? '🥇 ' : idx === 2 ? '🥈 ' : '⚓ '} ${f.name}</div>
+        <div style="font-weight:700;font-size:14px;color:var(--text-main)">${idx === 0 ? '👑 ' : idx === 1 ? '🥈 ' : '⚓ '} ${f.name}</div>
         <div class="mut" style="font-size:11px">${f.level}</div>
       </div>
       <div style="text-align:right">
@@ -393,7 +392,6 @@ function updateUI(){
   let pct = Math.min(100, Math.round((state.pages / state.goal) * 100));
   document.getElementById('hi-bpct').textContent = pct + '%';
   
-  // Atualiza o gráfico circular
   let donutPath = document.getElementById('donut-path');
   let donutPct = document.getElementById('donut-pct');
   let donutDesc = document.getElementById('donut-desc');
@@ -402,12 +400,13 @@ function updateUI(){
   if(donutPct) donutPct.textContent = pct + '%';
   if(donutDesc) donutDesc.textContent = `${state.pages} de ${state.goal} páginas da meta alcançadas.`;
 
-  // Lógica de Evolução da Caravela por Peças (12 peças totais com base nas páginas lidas)
+  // Evolução 3D / Lúdica da Embarcação
   let totalPages = state.pages;
-  let piecesEarned = Math.min(12, Math.floor(totalPages / 20)); // A cada 20 páginas ganha 1 peça
+  let piecesEarned = Math.min(12, Math.floor(totalPages / 20)); 
   let shipPct = Math.round((piecesEarned / 12) * 100);
 
   let badge = document.getElementById('ship-level-badge');
+  let icon3d = document.getElementById('ship-3d-icon');
   let title = document.getElementById('ship-level-title');
   let desc = document.getElementById('ship-level-desc');
   let piecesTxt = document.getElementById('ship-pieces-txt');
@@ -415,19 +414,23 @@ function updateUI(){
 
   if(piecesEarned >= 10){
     if(badge) badge.textContent = 'Nível 4 (Máximo)';
-    if(title) title.textContent = '🏴‍☠️ Nau Capitânia Lendária';
+    if(icon3d) icon3d.textContent = '🏴‍☠️⛵';
+    if(title) title.textContent = 'Nau Capitânia Lendária';
     if(desc) desc.textContent = 'Sua frota domina os mares do conhecimento com canhões e bandeira dourada!';
   } else if(piecesEarned >= 6){
     if(badge) badge.textContent = 'Nível 3';
-    if(title) title.textContent = '🚢 Caravela de Exploração';
+    if(icon3d) icon3d.textContent = '🚢⚓';
+    if(title) title.textContent = 'Caravela de Exploração';
     if(desc) desc.textContent = 'Casco reforçado e velas duplas erguidas para longas jornadas de estudo.';
   } else if(piecesEarned >= 3){
     if(badge) badge.textContent = 'Nível 2';
-    if(title) title.textContent = '⛵ Barco de Pesca / Vela Leve';
+    if(icon3d) icon3d.textContent = '⛵🌊';
+    if(title) title.textContent = 'Barco de Pesca / Vela Leve';
     if(desc) desc.textContent = 'O mastro está firme e o leme começa a guiar sua rotina literária.';
   } else {
     if(badge) badge.textContent = 'Nível 1';
-    if(title) title.textContent = '🪵 Jangada de Toras';
+    if(icon3d) icon3d.textContent = '🪵🛶';
+    if(title) title.textContent = 'Jangada de Toras';
     if(desc) desc.textContent = 'O ponto de partida do navegador. Leia mais páginas para construir novas peças!';
   }
 
