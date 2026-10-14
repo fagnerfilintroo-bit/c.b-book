@@ -163,7 +163,7 @@
 <div style="flex:1;min-width:0">
 <div class="mut" style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em">DESEMPENHO DA META</div>
 <div class="t" style="margin-top:2px;font-size:15px">Constância de Leitura</div>
-<div class="mut" style="margin-top:4px;font-size:12px" id="donut-desc">0 de 30 páginas da meta semanal alcançadas.</div>
+<div class="mut" style="margin-top:4px;font-size:12px" id="donut-desc">0 de 30 páginas da meta alcançadas.</div>
 </div>
 </div>
 
@@ -213,9 +213,25 @@
 <div style="padding:0 16px;margin-top:12px"><button class="pb" onclick="openEd(-1)"><i class="ti ti-plus"></i> Novo capítulo</button></div>
 </div>
 
-<!-- ABA PROGRESSO -->
+<!-- ABA PROGRESSO / DESENVOLVIMENTO -->
 <div class="v" id="v-prog">
-<div style="padding:20px 20px 10px"><div class="wm">Progresso</div></div>
+<div style="padding:20px 20px 10px"><div class="wm">Desenvolvimento</div></div>
+
+<!-- Card de Evolução da Caravela -->
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span class="mut" style="font-size:11px">EVOLUÇÃO DA EMBARCAÇÃO</span>
+<span class="badge" id="ship-level-badge">Nível 1</span>
+</div>
+<div class="t" id="ship-level-title" style="margin-top:4px">🪵 Jangada de Toras</div>
+<div class="mut" id="ship-level-desc" style="margin-top:4px;font-size:12px">Navegando rumo ao conhecimento. Leia mais para adquirir novas peças!</div>
+<div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+<span class="mut" style="font-size:11px" id="ship-pieces-txt">Peças conquistadas: 0 / 12</span>
+<span class="sf" id="ship-xp-pct" style="color:var(--blue-primary);font-size:14px">0%</span>
+</div>
+</div>
+
+<!-- Card de Gestão de Conta e Páginas -->
 <div class="card">
 <div class="t">Sua conta</div>
 <div class="mut" id="pg-mail" style="margin-top:4px"></div>
@@ -226,7 +242,22 @@
 <button class="pb" style="margin:0;width:100px;padding:8px;font-size:12px" onclick="saveTotalPages()">Atualizar</button>
 </div>
 </div>
-<button class="ob" style="margin-top:16px" onclick="logout()">Sair</button>
+</div>
+
+<!-- Card de Frota e Disputa de Navegação -->
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span class="mut" style="font-size:11px">DISPUTA DA FROTA (REGATTA)</span>
+<button class="btn-launch" style="padding:4px 10px;font-size:11px" onclick="openFriendModal()"><i class="ti ti-plus"></i> Adicionar Amigo</button>
+</div>
+<div class="t" style="margin-top:4px">Navegadores Aliados</div>
+<div class="list" id="friends-list" style="margin-top:10px">
+<!-- Amigos aparecem aqui -->
+</div>
+</div>
+
+<div style="padding:0 16px 20px">
+<button class="ob" style="width:100%;margin:0" onclick="logout()">Sair da Conta</button>
 </div>
 </div>
 
@@ -238,7 +269,7 @@
 <button id="n-leitura" onclick="tab('leitura')"><i class="ti ti-book"></i>Leitura</button>
 <button id="n-conc" onclick="tab('conc')"><i class="ti ti-school"></i>Concursos</button>
 <button id="n-est" onclick="tab('est')"><i class="ti ti-pencil"></i>Estúdio</button>
-<button id="n-prog" onclick="tab('prog')"><i class="ti ti-chart-bar"></i>Progresso</button>
+<button id="n-prog" onclick="tab('prog')"><i class="ti ti-chart-bar"></i>Desenvolvimento</button>
 </div>
 
 <!-- SCRIM E SHEETS -->
@@ -257,6 +288,15 @@
 <button class="ob" style="width:44px;margin:0;font-size:18px" onclick="stepAmt(5)">+</button>
 </div>
 <button class="pb" style="margin-top:16px" onclick="logPages()">Confirmar</button>
+</div>
+
+<!-- Modal para Adicionar Amigo na Frota -->
+<div class="sheet" id="friend-sheet">
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="sf" style="font-size:18px">Adicionar Navegador</span><button class="ib" onclick="closeSheets()"><i class="ti ti-x"></i></button></div>
+<div class="mut" style="margin-top:10px">Digite o nome ou e-mail do seu colega de estudos:</div>
+<input class="ip" id="friend-name-input" placeholder="Nome do amigo" style="margin-top:10px">
+<input class="ip" id="friend-pages-input" type="number" placeholder="Páginas lidas dele (estimativa)" style="margin-top:8px">
+<button class="pb" style="margin-top:16px" onclick="saveFriend()">Convidar para a Frota</button>
 </div>
 
 <!-- Modal para Notas / Anotações do Livro -->
