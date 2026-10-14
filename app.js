@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v3';
+var KEY = 'cbbook_v4';
 var state = load() || fresh();
 
 function fresh(){
@@ -6,6 +6,10 @@ function fresh(){
     v:1, logged:false, name:'', email:'', plan:0, ints:[],
     pages:0, goal:30, streak:0, hit:false, words:0,
     books: [],
+    friends: [
+      { id: 1, name: 'Carlos Almirante', pages: 145, level: 'Caravela de Exploração' },
+      { id: 2, name: 'Mariana Navigator', pages: 85, level: 'Barco de Pesca' }
+    ],
     qd:0, qt:0, qr:0, qi:0, erros:[], sub:{}, lastSub:'',
     ch:[]
   };
@@ -100,7 +104,7 @@ function logout(){
   go('s-login');
 }
 
-// Livros (Adicionar e Editar)
+// Gestão de Livros
 let editingBookId = null;
 
 function openBookModal(id = null){
@@ -172,6 +176,7 @@ function saveNewBook(){
   recalculateTotalPages();
   save();
   renderBooks();
+  updateUI();
   updateActiveBookDisplay();
   closeSheets();
 }
@@ -247,7 +252,7 @@ function updateActiveBookDisplay(){
   }
 }
 
-// Registro de Leitura e Seleção de Livros
+// Registro e Amigos
 let currentAdd = 10;
 let selectedBookIdForLog = null;
 
@@ -267,31 +272,70 @@ function openSheetForBook(bookId){
   document.getElementById('sheet').classList.add('act');
 }
 
+function openFriendModal(){
+  document.getElementById('scrim').classList.add('act');
+  document.getElementById('friend-sheet').classList.add('act');
+}
+
+function saveFriend(){
+  let name = document.getElementById('friend-name-input').value;
+  let pages = parseInt(document.getElementById('friend-pages-input').value) || 20;
+  if(!name){ toast('Digite o nome do navegador'); return; }
+
+  if(!state.friends) state.friends = [];
+  let lvl = pages > 200 ? '🏴‍☠️ Nau Capitânia' : pages > 100 ? '🚢 Caravela de Exploração' : '⛵ Barco de Pesca';
+  
+  state.friends.push({ id: Date.now(), name: name, pages: pages, level: lvl });
+  save();
+  renderFriends();
+  closeSheets();
+  toast('Navegador adicionado à frota!');
+}
+
+function renderFriends(){
+  let list = document.getElementById('friends-list');
+  if(!list) return;
+
+  if(!state.friends || state.friends.length === 0){
+    list.innerHTML = `<div class="mut">Nenhum aliado na frota ainda.</div>`;
+    return;
+  }
+
+  // Ordena por páginas lidas (Disputa/Regatta)
+  let sorted = [...state.friends].sort((a,b) => b.pages - a.pages);
+
+  list.innerHTML = sorted.map((f, idx) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-color)">
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--text-main)">${idx === 1 ? '🥇 ' : idx === 2 ? '🥈 ' : '⚓ '} ${f.name}</div>
+        <div class="mut" style="font-size:11px">${f.level}</div>
+      </div>
+      <div style="text-align:right">
+        <span class="sf" style="color:var(--blue-primary);font-size:16px">${f.pages}</span>
+        <span class="mut" style="font-size:11px"> pág</span>
+      </div>
+    </div>
+  `).join('');
+}
+
 function populateBookSelect(){
   let sel = document.getElementById('log-book-select');
   if(!sel) return;
-  
   if(!state.books || state.books.length === 0){
     sel.innerHTML = `<option value="">Nenhum livro cadastrado</option>`;
     return;
   }
-  
-  sel.innerHTML = state.books.map(b => `
-    <option value="${b.id}">${b.title} (${b.pages}/${b.total} pág)</option>
-  `).join('');
+  sel.innerHTML = state.books.map(b => `<option value="${b.id}">${b.title} (${b.pages}/${b.total} pág)</option>`).join('');
 }
 
-// Anotações por Livro
 let activeNoteBookId = null;
 
 function openNotesModal(bookId){
   activeNoteBookId = bookId;
   let book = state.books.find(b => b.id === bookId);
   if(!book) return;
-  
   document.getElementById('notes-book-title').textContent = book.title;
   document.getElementById('bk-notes-text').value = book.notes || '';
-  
   document.getElementById('scrim').classList.add('act');
   document.getElementById('notes-sheet').classList.add('act');
 }
@@ -312,6 +356,7 @@ function closeSheets(){
   document.getElementById('sheet').classList.remove('act');
   document.getElementById('book-sheet').classList.remove('act');
   document.getElementById('notes-sheet').classList.remove('act');
+  document.getElementById('friend-sheet').classList.remove('act');
   document.getElementById('ed').classList.remove('act');
 }
 
@@ -357,6 +402,38 @@ function updateUI(){
   if(donutPct) donutPct.textContent = pct + '%';
   if(donutDesc) donutDesc.textContent = `${state.pages} de ${state.goal} páginas da meta alcançadas.`;
 
+  // Lógica de Evolução da Caravela por Peças (12 peças totais com base nas páginas lidas)
+  let totalPages = state.pages;
+  let piecesEarned = Math.min(12, Math.floor(totalPages / 20)); // A cada 20 páginas ganha 1 peça
+  let shipPct = Math.round((piecesEarned / 12) * 100);
+
+  let badge = document.getElementById('ship-level-badge');
+  let title = document.getElementById('ship-level-title');
+  let desc = document.getElementById('ship-level-desc');
+  let piecesTxt = document.getElementById('ship-pieces-txt');
+  let xpPct = document.getElementById('ship-xp-pct');
+
+  if(piecesEarned >= 10){
+    if(badge) badge.textContent = 'Nível 4 (Máximo)';
+    if(title) title.textContent = '🏴‍☠️ Nau Capitânia Lendária';
+    if(desc) desc.textContent = 'Sua frota domina os mares do conhecimento com canhões e bandeira dourada!';
+  } else if(piecesEarned >= 6){
+    if(badge) badge.textContent = 'Nível 3';
+    if(title) title.textContent = '🚢 Caravela de Exploração';
+    if(desc) desc.textContent = 'Casco reforçado e velas duplas erguidas para longas jornadas de estudo.';
+  } else if(piecesEarned >= 3){
+    if(badge) badge.textContent = 'Nível 2';
+    if(title) title.textContent = '⛵ Barco de Pesca / Vela Leve';
+    if(desc) desc.textContent = 'O mastro está firme e o leme começa a guiar sua rotina literária.';
+  } else {
+    if(badge) badge.textContent = 'Nível 1';
+    if(title) title.textContent = '🪵 Jangada de Toras';
+    if(desc) desc.textContent = 'O ponto de partida do navegador. Leia mais páginas para construir novas peças!';
+  }
+
+  if(piecesTxt) piecesTxt.textContent = `Peças conquistadas: ${piecesEarned} / 12`;
+  if(xpPct) xpPct.textContent = shipPct + '%';
+
   let stkEl = document.querySelector('.stk');
   if(stkEl) stkEl.textContent = state.streak;
   let mailEl = document.getElementById('pg-mail');
@@ -365,11 +442,13 @@ function updateUI(){
   if(totalInput) totalInput.value = state.pages;
   
   updateActiveBookDisplay();
+  renderFriends();
 }
 
 function initApp(){
   updateUI();
   renderBooks();
+  renderFriends();
   if(state.logged){
     go('s-app');
   }
