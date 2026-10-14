@@ -149,6 +149,16 @@
 </div>
 </div>
 
+<!-- DESAFIO DIÁRIO (VENTO NOS CASTELOS) -->
+<div class="card" style="border-color:rgba(56,189,248,0.3)">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span class="mut" style="font-size:11px">🌬️ VENTO NOS CASTELOS (MISSÃO DIÁRIA)</span>
+<span class="badge" id="quest-status">Pendente</span>
+</div>
+<div class="t" style="margin-top:4px;font-size:15px" id="quest-title">Ler pelo menos 15 páginas hoje</div>
+<div class="mut" style="margin-top:4px;font-size:12px">Complete o desafio diário para garantir vento a favor na sua frota!</div>
+</div>
+
 <!-- GRÁFICO CIRCULAR DE DESEMPENHO -->
 <div class="card" style="display:flex;align-items:center;gap:20px;">
 <div style="position:relative;width:80px;height:80px;flex-shrink:0;">
@@ -217,10 +227,10 @@
 <div class="v" id="v-prog">
 <div style="padding:20px 20px 10px"><div class="wm">Desenvolvimento</div></div>
 
-<!-- Card de Visual 3D / Maquete da Embarcação -->
+<!-- Card de Maquete 3D e Prestígio -->
 <div class="card" style="text-align:center;background:linear-gradient(135deg, rgba(56,189,248,0.1) 0%, rgba(13,27,51,0.8) 100%);border:1px solid rgba(56,189,248,0.3)">
 <div style="display:flex;justify-content:space-between;align-items:center">
-<span class="mut" style="font-size:11px">MAQUETE DA EMBARCAÇÃO</span>
+<span class="mut" style="font-size:11px" id="ship-ocean-title">OCEANO DOS CLÁSSICOS</span>
 <span class="badge" id="ship-level-badge">Nível 1</span>
 </div>
 <div id="ship-3d-icon" style="font-size:64px;margin:16px 0;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.5))">🪵</div>
@@ -230,6 +240,21 @@
 <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.2);padding:8px 12px;border-radius:8px">
 <span class="mut" style="font-size:11px" id="ship-pieces-txt">Peças conquistadas: 0 / 12</span>
 <span class="sf" id="ship-xp-pct" style="color:var(--blue-primary);font-size:14px">0%</span>
+</div>
+
+<!-- Botão de Prestígio (Visível ao completar o nível máximo) -->
+<div id="prestige-container" style="margin-top:14px;display:none">
+<button class="pb" style="background:linear-gradient(135deg, #f59e0b, #d97706);color:#060e1e;font-weight:800" onclick="triggerPrestige()">✨ Zarpar para Novo Oceano (Prestígio)</button>
+</div>
+<div class="mut" id="prestige-stars" style="margin-top:10px;font-size:12px">⭐️ Estrelas de Almirante: 0</div>
+</div>
+
+<!-- DIÁRIO DE BORDO: GUIA DAS PEÇAS -->
+<div class="card">
+<div class="t">📜 Diário de Bordo das Peças</div>
+<div class="mut" style="margin-top:4px;font-size:12px">Acompanhe o que cada conquista exige na sua embarcação:</div>
+<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px" id="pieces-diary-list">
+<!-- Preenchido dinamicamente -->
 </div>
 </div>
 
