@@ -1,10 +1,11 @@
-var KEY = 'cbbook_v4';
+var KEY = 'cbbook_v5';
 var state = load() || fresh();
 
 function fresh(){
   return {
     v:1, logged:false, name:'', email:'', plan:0, ints:[],
     pages:0, goal:30, streak:0, hit:false, words:0,
+    prestige: 0, questCompleted: false,
     books: [],
     friends: [
       { id: 1, name: 'Carlos Almirante', pages: 145, level: 'Caravela de Exploração' },
@@ -378,11 +379,26 @@ function logPages(){
   recalculateTotalPages();
   state.streak = 1;
 
+  // Atualiza desafio diário
+  if(state.pages >= 15) state.questCompleted = true;
+
   save();
   updateUI();
   renderBooks();
   closeSheets();
   toast('Leitura registrada para ' + book.title + '!');
+}
+
+function triggerPrestige(){
+  state.prestige = (state.prestige || 0) + 1;
+  state.pages = 0;
+  if(state.books){
+    state.books.forEach(b => b.pages = 0);
+  }
+  save();
+  updateUI();
+  renderBooks();
+  toast('Parabéns! Você zarpou para um novo oceano com Prestígio ' + state.prestige + '!');
 }
 
 function updateUI(){
@@ -400,7 +416,15 @@ function updateUI(){
   if(donutPct) donutPct.textContent = pct + '%';
   if(donutDesc) donutDesc.textContent = `${state.pages} de ${state.goal} páginas da meta alcançadas.`;
 
-  // Evolução 3D / Lúdica da Embarcação
+  // Atualiza Missão Diária
+  let qStatus = document.getElementById('quest-status');
+  if(state.pages >= 15){
+    if(qStatus){ qStatus.textContent = 'Concluído 🌬️'; qStatus.style.color = 'var(--green-accent)'; }
+  } else {
+    if(qStatus){ qStatus.textContent = 'Pendente'; qStatus.style.color = 'var(--text-mut)'; }
+  }
+
+  // Evolução 3D e Peças (12 peças totais, 1 peça a cada 20 páginas)
   let totalPages = state.pages;
   let piecesEarned = Math.min(12, Math.floor(totalPages / 20)); 
   let shipPct = Math.round((piecesEarned / 12) * 100);
@@ -411,31 +435,69 @@ function updateUI(){
   let desc = document.getElementById('ship-level-desc');
   let piecesTxt = document.getElementById('ship-pieces-txt');
   let xpPct = document.getElementById('ship-xp-pct');
+  let oceanTitle = document.getElementById('ship-ocean-title');
+  let prestigeContainer = document.getElementById('prestige-container');
+  let prestigeStars = document.getElementById('prestige-stars');
 
-  if(piecesEarned >= 10){
-    if(badge) badge.textContent = 'Nível 4 (Máximo)';
+  // Oceano temático por Prestígio
+  let oceans = ['OCEANO DOS CLÁSSICOS', 'MAR DA FILOSOFIA', 'ARQUIPÉLAGO DOS CONCURSOS', 'FROTA IMPERIAL LENDÁRIA'];
+  let currentOcean = oceans[Math.min(state.prestige || 0, oceans.length - 1)];
+  if(oceanTitle) oceanTitle.textContent = currentOcean;
+  if(prestigeStars) prestigeStars.textContent = `⭐️ Estrelas de Almirante: ${state.prestige || 0}`;
+
+  if(piecesEarned >= 12){
+    if(badge) badge.textContent = 'Nível Máximo';
     if(icon3d) icon3d.textContent = '🏴‍☠️⛵';
     if(title) title.textContent = 'Nau Capitânia Lendária';
-    if(desc) desc.textContent = 'Sua frota domina os mares do conhecimento com canhões e bandeira dourada!';
-  } else if(piecesEarned >= 6){
-    if(badge) badge.textContent = 'Nível 3';
-    if(icon3d) icon3d.textContent = '🚢⚓';
-    if(title) title.textContent = 'Caravela de Exploração';
-    if(desc) desc.textContent = 'Casco reforçado e velas duplas erguidas para longas jornadas de estudo.';
-  } else if(piecesEarned >= 3){
-    if(badge) badge.textContent = 'Nível 2';
-    if(icon3d) icon3d.textContent = '⛵🌊';
-    if(title) title.textContent = 'Barco de Pesca / Vela Leve';
-    if(desc) desc.textContent = 'O mastro está firme e o leme começa a guiar sua rotina literária.';
+    if(desc) desc.textContent = 'Sua frota domina os mares do conhecimento! Pronto para zarpar rumo ao próximo oceano.';
+    if(prestigeContainer) prestigeContainer.style.display = 'block';
   } else {
-    if(badge) badge.textContent = 'Nível 1';
-    if(icon3d) icon3d.textContent = '🪵🛶';
-    if(title) title.textContent = 'Jangada de Toras';
-    if(desc) desc.textContent = 'O ponto de partida do navegador. Leia mais páginas para construir novas peças!';
+    if(prestigeContainer) prestigeContainer.style.display = 'none';
+    if(piecesEarned >= 9){
+      if(badge) badge.textContent = 'Nível 4';
+      if(icon3d) icon3d.textContent = '🚢⚓';
+      if(title) title.textContent = 'Caravela de Exploração Avançada';
+      if(desc) desc.textContent = 'Casco reforçado e canhões prontos para a travessia final.';
+    } else if(piecesEarned >= 6){
+      if(badge) badge.textContent = 'Nível 3';
+      if(icon3d) icon3d.textContent = '⛵🧭';
+      if(title) title.textContent = 'Caravela de Exploração';
+      if(desc) desc.textContent = 'Velas duplas erguidas para longas jornadas de estudo.';
+    } else if(piecesEarned >= 3){
+      if(badge) badge.textContent = 'Nível 2';
+      if(icon3d) icon3d.textContent = '🛶🌊';
+      if(title) title.textContent = 'Barco de Pesca / Vela Leve';
+      if(desc) desc.textContent = 'O mastro está firme e o leme começa a guiar sua rotina.';
+    } else {
+      if(badge) badge.textContent = 'Nível 1';
+      if(icon3d) icon3d.textContent = '🪵';
+      if(title) title.textContent = 'Jangada de Toras';
+      if(desc) desc.textContent = 'O ponto de partida do navegador. Leia mais para construir peças!';
+    }
   }
 
   if(piecesTxt) piecesTxt.textContent = `Peças conquistadas: ${piecesEarned} / 12`;
   if(xpPct) xpPct.textContent = shipPct + '%';
+
+  // Renderiza o Diário de Bordo das 12 Peças
+  let diaryList = document.getElementById('pieces-diary-list');
+  if(diaryList){
+    let pieceNames = [
+      "Tronco base de madeira", "Corda de amarra", "Remo rústico",
+      "Mastro central de madeira", "Vela de tecido branco", "Leme de direção",
+      "Segunda vela e cordame", "Cesto do vigia (Gávea)", "Casco reforçado",
+      "Estandarte principal", "Canhões laterais", "Leme de ouro mestre"
+    ];
+    diaryList.innerHTML = pieceNames.map((pName, idx) => {
+      let unlocked = piecesEarned > idx;
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:6px;border:1px solid ${unlocked ? 'rgba(56,189,248,0.4)' : 'var(--border-color)'}">
+          <span style="font-size:13px;color:${unlocked ? 'var(--text-main)' : 'var(--text-mut)'}">${idx+1}. ${pName} (${(idx)*20}–${(idx+1)*20} pág)</span>
+          <span style="font-size:12px">${unlocked ? '✅ Conquistada' : '🔒 Bloqueada'}</span>
+        </div>
+      `;
+    }).join('');
+  }
 
   let stkEl = document.querySelector('.stk');
   if(stkEl) stkEl.textContent = state.streak;
