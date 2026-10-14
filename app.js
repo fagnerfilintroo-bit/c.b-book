@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v5';
+var KEY = 'cbbook_v6';
 var state = load() || fresh();
 
 function fresh(){
@@ -7,10 +7,7 @@ function fresh(){
     pages:0, goal:30, streak:0, hit:false, words:0,
     prestige: 0, questCompleted: false,
     books: [],
-    friends: [
-      { id: 1, name: 'Carlos Almirante', pages: 145, level: 'Caravela de Exploração' },
-      { id: 2, name: 'Mariana Navigator', pages: 85, level: 'Barco de Pesca' }
-    ],
+    friends: [], // Iniciado vazio para não exibir amigos fantasmas
     qd:0, qt:0, qr:0, qi:0, erros:[], sub:{}, lastSub:'',
     ch:[]
   };
@@ -298,7 +295,7 @@ function renderFriends(){
   if(!list) return;
 
   if(!state.friends || state.friends.length === 0){
-    list.innerHTML = `<div class="mut">Nenhum aliado na frota ainda.</div>`;
+    list.innerHTML = `<div class="mut" style="font-size:12px;padding:4px 0">Nenhum aliado na frota ainda. Adicione amigos para disputar a regatta!</div>`;
     return;
   }
 
@@ -379,7 +376,6 @@ function logPages(){
   recalculateTotalPages();
   state.streak = 1;
 
-  // Atualiza desafio diário
   if(state.pages >= 15) state.questCompleted = true;
 
   save();
@@ -416,7 +412,6 @@ function updateUI(){
   if(donutPct) donutPct.textContent = pct + '%';
   if(donutDesc) donutDesc.textContent = `${state.pages} de ${state.goal} páginas da meta alcançadas.`;
 
-  // Atualiza Missão Diária
   let qStatus = document.getElementById('quest-status');
   if(state.pages >= 15){
     if(qStatus){ qStatus.textContent = 'Concluído 🌬️'; qStatus.style.color = 'var(--green-accent)'; }
@@ -424,7 +419,6 @@ function updateUI(){
     if(qStatus){ qStatus.textContent = 'Pendente'; qStatus.style.color = 'var(--text-mut)'; }
   }
 
-  // Evolução 3D e Peças (12 peças totais, 1 peça a cada 20 páginas)
   let totalPages = state.pages;
   let piecesEarned = Math.min(12, Math.floor(totalPages / 20)); 
   let shipPct = Math.round((piecesEarned / 12) * 100);
@@ -439,7 +433,6 @@ function updateUI(){
   let prestigeContainer = document.getElementById('prestige-container');
   let prestigeStars = document.getElementById('prestige-stars');
 
-  // Oceano temático por Prestígio
   let oceans = ['OCEANO DOS CLÁSSICOS', 'MAR DA FILOSOFIA', 'ARQUIPÉLAGO DOS CONCURSOS', 'FROTA IMPERIAL LENDÁRIA'];
   let currentOcean = oceans[Math.min(state.prestige || 0, oceans.length - 1)];
   if(oceanTitle) oceanTitle.textContent = currentOcean;
@@ -479,7 +472,6 @@ function updateUI(){
   if(piecesTxt) piecesTxt.textContent = `Peças conquistadas: ${piecesEarned} / 12`;
   if(xpPct) xpPct.textContent = shipPct + '%';
 
-  // Renderiza o Diário de Bordo das 12 Peças
   let diaryList = document.getElementById('pieces-diary-list');
   if(diaryList){
     let pieceNames = [
