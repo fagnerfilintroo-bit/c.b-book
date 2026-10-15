@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v17';
+var KEY = 'cbbook_v18';
 var state = load() || fresh();
 
 function fresh(){
