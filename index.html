@@ -321,4 +321,41 @@
 <div style="display:flex;justify-content:space-between;align-items:center"><span class="sf" style="font-size:18px">Adicionar Navegador</span><button class="ib" onclick="closeSheets()"><i class="ti ti-x"></i></button></div>
 <div class="mut" style="margin-top:10px">Digite o nome ou e-mail do seu colega de estudos:</div>
 <input class="ip" id="friend-name-input" placeholder="Nome do amigo" style="margin-top:10px">
-<input class="ip" id="friend-pages
+<input class="ip" id="friend-pages-input" type="number" placeholder="Páginas lidas dele (estimativa)" style="margin-top:8px">
+<button class="pb" style="margin-top:16px" onclick="saveFriend()">Convidar para a Frota</button>
+</div>
+
+<div class="sheet" id="notes-sheet">
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="sf" style="font-size:18px">Anotações do Livro</span><button class="ib" onclick="closeSheets()"><i class="ti ti-x"></i></button></div>
+<div class="mut" id="notes-book-title" style="margin-top:6px;font-weight:700;color:var(--text-main)"></div>
+<textarea class="ip" id="bk-notes-text" placeholder="Escreva suas anotações, reflexões ou resumos aqui..." style="min-height:160px;margin-top:12px"></textarea>
+<button class="pb" style="margin-top:16px" onclick="saveBookNotes()">Salvar Anotações</button>
+</div>
+
+<div class="sheet" id="book-sheet">
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="sf" id="book-modal-title" style="font-size:18px">Adicionar Novo Livro</span><button class="ib" onclick="closeSheets()"><i class="ti ti-x"></i></button></div>
+<input class="ip" id="bk-title" placeholder="Título do livro">
+<input class="ip" id="bk-author" placeholder="Autor">
+<div class="mut" style="margin-top:8px;font-size:12px">Páginas lidas atuais e Total:</div>
+<div style="display:flex;gap:8px">
+<input class="ip" id="bk-pages-read" type="number" placeholder="Lidas (ex: 0)">
+<input class="ip" id="bk-pages" type="number" placeholder="Total">
+</div>
+<input class="ip" id="bk-cover" placeholder="URL da capa (opcional)" style="margin-top:8px">
+<button class="pb" style="margin-top:20px" onclick="saveNewBook()">Salvar Livro</button>
+</div>
+
+<div class="sheet" id="ed">
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="sf" style="font-size:18px">Escrever capítulo</span><button class="ib" onclick="closeSheets()"><i class="ti ti-x"></i></button></div>
+<input class="ip" id="edt" placeholder="Título do capítulo">
+<textarea class="ip" id="edx" placeholder="Escreva o texto aqui..." oninput="edCount()"></textarea>
+<div class="mut" id="edc" style="margin-top:6px">0 palavras</div>
+<button class="pb" style="margin-top:12px" onclick="edSave()">Salvar capítulo</button>
+</div>
+
+</div>
+
+<script src="dados.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
