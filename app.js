@@ -856,6 +856,7 @@ function evoPages(){
 function chapterWords(c){
   var txt = '';
   if(typeof c === 'string') txt = c;
+  else if(c && typeof c.text === 'string') txt = c.text;
   else if(c && typeof c === 'object'){
     for(var k in c){ if(typeof c[k] === 'string' && c[k].length > txt.length) txt = c[k]; }
   }
@@ -866,7 +867,6 @@ function chapterWords(c){
 function writtenPages(){
   var w = 0;
   if(Array.isArray(state.ch)) state.ch.forEach(function(c){ w += chapterWords(c); });
-  w = Math.max(w, state.words || 0);
   return Math.floor(w / WORDS_PER_PAGE);
 }
 
@@ -1175,6 +1175,215 @@ saveNewBook = function(){
     updateUI();
     renderBooks();
   }
+};
+
+
+/* ================= CONCURSOS (quiz com as questões do dados.js) ================= */
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+}
+
+var qzPicked = null;
+
+function qzList(){
+  if(typeof QUESTOES === 'undefined' || !Array.isArray(state.qq)) return [];
+  var byId = {};
+  QUESTOES.forEach(function(q){ byId[q.id] = q; });
+  return state.qq.map(function(id){ return byId[id]; }).filter(Boolean);
+}
+
+function qzStartRound(mode, silent){
+  var ids = (mode === 'erros')
+    ? (state.erros || []).filter(function(id){ return typeof QUESTOES !== 'undefined' && QUESTOES.some(function(q){ return q.id === id; }); })
+    : (typeof QUESTOES !== 'undefined' ? QUESTOES.map(function(q){ return q.id; }) : []);
+  if(!ids.length){ toast('Sem erros para revisar 🎉'); return; }
+  state.qq = ids; state.qi = 0; state.qr = 0; state.qt = 0;
+  qzPicked = null;
+  save();
+  if(!silent) renderQuiz();
+}
+
+function qzAnswer(k){
+  if(qzPicked !== null) return;
+  var list = qzList(), q = list[state.qi || 0];
+  if(!q) return;
+  qzPicked = k;
+  var right = (k === q.c);
+  state.qt = (state.qt || 0) + 1;
+  if(right) state.qr = (state.qr || 0) + 1;
+  if(!state.sub) state.sub = {};
+  var ss = state.sub[q.s] || {t: 0, r: 0};
+  ss.t++; if(right) ss.r++;
+  state.sub[q.s] = ss;
+  if(!Array.isArray(state.erros)) state.erros = [];
+  var pos = state.erros.indexOf(q.id);
+  if(!right && pos < 0) state.erros.push(q.id);
+  if(right && pos >= 0) state.erros.splice(pos, 1);
+  state.lastSub = q.s;
+  save();
+  renderQuiz();
+}
+
+function qzNext(){
+  state.qi = (state.qi || 0) + 1;
+  qzPicked = null;
+  save();
+  renderQuiz();
+}
+
+function renderQuiz(){
+  var box = document.getElementById('quiz');
+  if(!box) return;
+  if(typeof QUESTOES === 'undefined' || !QUESTOES.length){
+    box.innerHTML = '<div class="mut">Nenhuma questão cadastrada em dados.js.</div>';
+    return;
+  }
+  if(!Array.isArray(state.qq) || !state.qq.length) qzStartRound('all', true);
+  var list = qzList(), i = state.qi || 0, h = '';
+
+  if(i >= list.length){
+    var pct = state.qt ? Math.round((state.qr || 0) / state.qt * 100) : 0;
+    h += '<div class="mut" style="font-size:11px">RODADA CONCLUÍDA</div>' +
+         '<div class="sf" style="font-size:34px;margin-top:6px">' + (state.qr || 0) + ' / ' + (state.qt || 0) + '</div>' +
+         '<div class="mut" style="margin-top:2px">' + pct + '% de acerto</div>' +
+         '<button class="pb" style="margin-top:16px" onclick="qzStartRound(\'all\')">Refazer tudo</button>' +
+         ((state.erros && state.erros.length) ? '<button class="ob" style="margin-top:8px" onclick="qzStartRound(\'erros\')">Revisar meus erros (' + state.erros.length + ')</button>' : '');
+  } else {
+    var q = list[i];
+    h += '<div style="display:flex;justify-content:space-between;align-items:center">' +
+         '<span class="mut" style="font-size:11px">QUESTÃO ' + (i + 1) + ' DE ' + list.length + '</span>' +
+         '<span class="badge">' + esc(q.s) + '</span></div>' +
+         '<div class="t" style="margin-top:10px;font-size:16px;line-height:1.45">' + esc(q.q) + '</div>' +
+         '<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">';
+    q.o.forEach(function(opt, k){
+      var st = 'text-align:left;margin:0;';
+      if(qzPicked !== null){
+        if(k === q.c) st += 'border-color:#22c55e;background:rgba(34,197,94,.18);';
+        else if(k === qzPicked) st += 'border-color:#ef4444;background:rgba(239,68,68,.18);';
+        else st += 'opacity:.55;';
+      }
+      h += '<button class="ob" style="' + st + '"' + (qzPicked !== null ? ' disabled' : ' onclick="qzAnswer(' + k + ')"') + '>' +
+           '<b>' + 'ABCD'.charAt(k) + ')</b> ' + esc(opt) + '</button>';
+    });
+    h += '</div>';
+    if(qzPicked !== null){
+      var ok = qzPicked === q.c;
+      h += '<div style="margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.05);font-size:13px;line-height:1.5">' +
+           '<b style="color:' + (ok ? '#22c55e' : '#ef4444') + '">' + (ok ? '✅ Acertou!' : '❌ Não foi dessa vez.') + '</b> ' + esc(q.e) + '</div>' +
+           '<button class="pb" style="margin-top:12px" onclick="qzNext()">' + (i + 1 >= list.length ? 'Ver resultado' : 'Próxima questão') + '</button>';
+    }
+  }
+
+  var subs = state.sub || {}, names = Object.keys(subs);
+  if(names.length){
+    h += '<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border-color)"><div class="mut" style="font-size:11px">DESEMPENHO POR MATÉRIA</div>';
+    names.forEach(function(n){
+      var p = Math.round(subs[n].r / subs[n].t * 100);
+      h += '<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>' + esc(n) + '</span><span class="mut">' + subs[n].r + '/' + subs[n].t + ' · ' + p + '%</span></div>' +
+           '<div style="height:6px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:4px"><div style="height:6px;border-radius:4px;width:' + p + '%;background:var(--blue-primary)"></div></div></div>';
+    });
+    h += '</div>';
+  }
+  box.innerHTML = h;
+}
+
+/* ================= ESTÚDIO (capítulos) ================= */
+var editingChapter = -1;
+
+function totalWords(){
+  var w = 0;
+  (state.ch || []).forEach(function(c){ w += chapterWords(c); });
+  return w;
+}
+
+function edCount(){
+  var x = document.getElementById('edx'), c = document.getElementById('edc');
+  if(!x || !c) return;
+  var t = x.value.trim();
+  c.textContent = (t ? t.split(/\s+/).length : 0) + ' palavras';
+}
+
+function openEd(i){
+  editingChapter = (i === undefined || i === null) ? -1 : i;
+  var ch = (editingChapter >= 0 && state.ch) ? state.ch[editingChapter] : null;
+  document.getElementById('edt').value = ch ? (ch.title || '') : '';
+  document.getElementById('edx').value = ch ? (ch.text || '') : '';
+  edCount();
+  document.getElementById('scrim').classList.add('act');
+  document.getElementById('ed').classList.add('act');
+}
+
+function edSave(){
+  var title = document.getElementById('edt').value.trim();
+  var text = document.getElementById('edx').value;
+  if(!title && !text.trim()){ toast('Escreva um título ou um texto'); return; }
+  if(!Array.isArray(state.ch)) state.ch = [];
+  if(editingChapter >= 0 && state.ch[editingChapter]){
+    state.ch[editingChapter].title = title || 'Sem título';
+    state.ch[editingChapter].text = text;
+  } else {
+    state.ch.push({id: Date.now(), title: title || 'Sem título', text: text, date: dayKey(new Date())});
+  }
+  state.words = totalWords();
+  save();
+  closeSheets();
+  updateUI();
+  toast('Capítulo salvo!');
+}
+
+function edDelete(i){
+  if(!state.ch || !state.ch[i]) return;
+  if(!confirm('Excluir o capítulo "' + state.ch[i].title + '"? Isso também diminui suas páginas escritas.')) return;
+  state.ch.splice(i, 1);
+  state.words = totalWords();
+  save();
+  updateUI();
+}
+
+function renderChapters(){
+  var el = document.getElementById('chaps');
+  if(!el) return;
+  var w = totalWords(), pg = Math.floor(w / WORDS_PER_PAGE);
+  var pct = Math.min(100, Math.round(pg / NAUT_WRITE * 100));
+  var h = '<div class="card" style="margin:0 0 10px 0">' +
+    '<div class="mut" style="font-size:11px">✍️ TOTAL ESCRITO</div>' +
+    '<div style="display:flex;align-items:baseline;gap:8px;margin-top:4px"><span class="sf" style="font-size:30px">' + pg + '</span><span class="mut">/ ' + NAUT_WRITE + ' págs (meta do Nautilus)</span></div>' +
+    '<div class="mut" style="font-size:12px;margin-top:2px">' + w + ' palavras · ' + WORDS_PER_PAGE + ' palavras = 1 página</div>' +
+    '<div style="height:6px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:8px"><div style="height:6px;border-radius:4px;width:' + pct + '%;background:#f5b82e"></div></div></div>';
+  if(!state.ch || !state.ch.length){
+    h += '<div class="card" style="margin:0 0 10px 0"><div class="mut">Nenhum capítulo ainda. Toque em "Novo capítulo" para começar a escrever.</div></div>';
+  } else {
+    state.ch.forEach(function(c, i){
+      var cw = chapterWords(c), prev = (c.text || '').replace(/\s+/g, ' ').trim().slice(0, 90);
+      h += '<div class="card" style="margin:0 0 10px 0"><div style="display:flex;gap:10px;align-items:center">' +
+        '<div style="flex:1;min-width:0"><div class="t" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(c.title || 'Sem título') + '</div>' +
+        '<div class="mut" style="font-size:12px;margin-top:2px">' + cw + ' palavras · ' + (cw / WORDS_PER_PAGE).toFixed(1) + ' pág</div>' +
+        (prev ? '<div class="mut" style="font-size:12px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(prev) + '</div>' : '') + '</div>' +
+        '<button class="ib" onclick="openEd(' + i + ')" title="Editar"><i class="ti ti-pencil"></i></button>' +
+        '<button class="ib" onclick="edDelete(' + i + ')" title="Excluir"><i class="ti ti-trash"></i></button>' +
+        '</div></div>';
+    });
+  }
+  el.innerHTML = h;
+}
+
+/* ---------- ligação com o app ---------- */
+var _tabBase = tab;
+tab = function(name){
+  _tabBase(name);
+  try{
+    if(name === 'conc' && qzPicked === null) renderQuiz();
+    if(name === 'est') renderChapters();
+  }catch(err){ cbShowError('aba ' + name + ': ' + err.message); }
+};
+
+var _studioBase = updateUI;
+updateUI = function(){
+  _studioBase();
+  try{
+    renderChapters();
+    if(qzPicked === null) renderQuiz();
+  }catch(err){ cbShowError('estúdio/quiz: ' + err.message); }
 };
 
 if(state && state.logged) { try{ updateUI(); }catch(e){} }
