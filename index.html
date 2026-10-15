@@ -114,20 +114,27 @@
 <div class="views">
 
 <!-- INÍCIO -->
-<div class="v act" id="v-hoje" style="padding-bottom:90px">
-<svg class="bg-ship" viewBox="0 0 240 160" aria-hidden="true"><use href="#cvg"/></svg>
+<div class="v act" id="v-hoje" style="padding-bottom:100px">
+<!-- Caravela Estruturada em Textura de Madeira no Topo -->
+<div id="home-ship-container" style="position:relative;width:100%;height:140px;background:linear-gradient(180deg, rgba(139,69,19,0.25) 0%, rgba(6,14,30,0.95) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:1px solid rgba(210,105,30,0.3);overflow:hidden;">
+  <div id="home-ship-art" style="font-size:52px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.7));transition:transform 0.4s ease;">🪵🛶</div>
+  <div class="mut" id="home-ship-subtitle" style="font-size:11px;margin-top:4px;letter-spacing:0.05em;color:#deb887">Jangada de Toras • Nível 1</div>
+</div>
 
 <div style="padding:16px 20px 8px;display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2">
 <div>
-<div class="tag" id="hi-rank-tag">RECRUTA 🎖️</div>
-<div class="wm" id="hi-name" style="font-size:22px;margin-top:2px">Fagner</div>
-<div class="mut" style="font-size:12px">Sua jornada de estudos em um só lugar.</div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <span class="tag" id="hi-rank-tag">RECRUTA 🎖️</span>
+    <span id="hi-badge-icon" style="font-size:14px">🪵</span>
+  </div>
+  <div class="wm" id="hi-name" style="font-size:22px;margin-top:2px">Fagner</div>
+  <div class="mut" style="font-size:12px">Sua jornada de estudos em um só lugar.</div>
 </div>
 <button class="btn-launch" onclick="openSheet()"><i class="ti ti-plus"></i> Registrar</button>
 </div>
 
 <!-- Painel de Progresso -->
-<div class="card" style="margin-top:8px">
+<div class="card" style="margin-top:4px">
 <div style="display:flex;justify-content:space-between;align-items:center">
 <span class="mut" style="font-size:12px">Painel de Progresso (7 dias)</span>
 <span class="badge" style="background:rgba(34,197,94,0.15);color:var(--green-accent);border:none">• ativo</span>
@@ -190,7 +197,7 @@
 </div>
 
 <!-- ABA LEITURA -->
-<div class="v" id="v-leitura" style="padding-bottom:90px">
+<div class="v" id="v-leitura" style="padding-bottom:100px">
 <div style="padding:20px 20px 10px;display:flex;justify-content:space-between;align-items:center">
 <div class="wm">Leitura</div>
 <button class="btn-launch" onclick="openBookModal()"><i class="ti ti-plus"></i> Novo Livro</button>
@@ -201,33 +208,33 @@
 </div>
 
 <!-- ABA CONCURSOS -->
-<div class="v" id="v-conc" style="padding-bottom:90px">
+<div class="v" id="v-conc" style="padding-bottom:100px">
 <div style="padding:20px 20px 10px"><div class="wm">Concursos</div></div>
 <div class="card" id="quiz"></div>
 </div>
 
 <!-- ABA ESTÚDIO -->
-<div class="v" id="v-est" style="padding-bottom:90px">
+<div class="v" id="v-est" style="padding-bottom:100px">
 <div style="padding:20px 20px 10px"><div class="wm">Estúdio</div></div>
 <div class="list" id="chaps"></div>
 <div style="padding:0 16px;margin-top:12px"><button class="pb" onclick="openEd(-1)"><i class="ti ti-plus"></i> Novo capítulo</button></div>
 </div>
 
 <!-- ABA PROGRESSO / DESENVOLVIMENTO -->
-<div class="v" id="v-prog" style="padding-bottom:90px">
+<div class="v" id="v-prog" style="padding-bottom:100px">
 <div style="padding:20px 20px 10px"><div class="wm">Desenvolvimento</div></div>
 
-<!-- Card de Maquete 3D com Textura de Madeira Evolutiva -->
-<div class="card" style="text-align:center;background:linear-gradient(135deg, rgba(139,69,19,0.2) 0%, rgba(13,27,51,0.9) 100%);border:1px solid rgba(210,105,30,0.4)">
+<!-- Card de Maquete Detalhada em Textura de Madeira -->
+<div class="card" style="text-align:center;background:linear-gradient(135deg, rgba(139,69,19,0.3) 0%, rgba(13,27,51,0.95) 100%);border:1px solid rgba(210,105,30,0.5)">
 <div style="display:flex;justify-content:space-between;align-items:center">
 <span class="mut" style="font-size:11px" id="ship-ocean-title">OCEANO DOS CLÁSSICOS</span>
 <span class="badge" id="ship-level-badge">Nível 1</span>
 </div>
-<div id="ship-3d-icon" style="font-size:64px;margin:14px 0;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.6));transition:transform 0.3s">🪵🛶</div>
-<div class="sf" id="ship-level-title" style="font-size:18px;color:#deb887">Jangada de Toras</div>
-<div class="mut" id="ship-level-desc" style="margin-top:6px;font-size:12px;line-height:1.4">O ponto de partida do navegador. Leia mais páginas para construir novas peças!</div>
+<div id="ship-3d-icon" style="font-size:68px;margin:16px 0;filter:drop-shadow(0 10px 18px rgba(0,0,0,0.7));transition:transform 0.4s ease">🪵🛶</div>
+<div class="sf" id="ship-level-title" style="font-size:18px;color:#deb887">Jangada de Toras (Madeira Bruta)</div>
+<div class="mut" id="ship-level-desc" style="margin-top:6px;font-size:12px;line-height:1.4">O ponto de partida do navegador em toras de madeira.</div>
 
-<div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.3);padding:8px 12px;border-radius:8px">
+<div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.4);padding:8px 12px;border-radius:8px">
 <span class="mut" style="font-size:11px" id="ship-pieces-txt">Peças conquistadas: 0 / 12</span>
 <span class="sf" id="ship-xp-pct" style="color:#deb887;font-size:14px">0%</span>
 </div>
