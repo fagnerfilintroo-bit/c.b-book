@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v12';
+var KEY = 'cbbook_v15';
 var state = load() || fresh();
 
 function fresh(){
@@ -404,6 +404,7 @@ function triggerPrestige(){
   toast('Parabéns! Você zarpou para um novo oceano com Prestígio ' + state.prestige + '!');
 }
 
+// Calendário Compacto Horizontal
 function renderConstancyCalendar(){
   let calendarEl = document.getElementById('constancy-calendar');
   let monthLabel = document.getElementById('calendar-month-label');
@@ -416,14 +417,14 @@ function renderConstancyCalendar(){
   let monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   if(monthLabel) monthLabel.textContent = monthNames[month];
 
-  let daysInMonth = new Date(year, month + 1, 0).getDate();
   let weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-
   if(!state.activeDays) state.activeDays = [];
 
-  let html = weekDays.map(d => `<div style="font-size:10px;color:#deb887;font-weight:700;padding-bottom:4px">${d}</div>`).join('');
+  let html = weekDays.map(d => `<div style="font-size:9px;color:#deb887;font-weight:700;padding-bottom:2px">${d}</div>`).join('');
 
+  let daysInMonth = new Date(year, month + 1, 0).getDate();
   let firstDayIndex = new Date(year, month, 1).getDay();
+
   for(let i = 0; i < firstDayIndex; i++){
     html += `<div></div>`;
   }
@@ -434,13 +435,13 @@ function renderConstancyCalendar(){
     let isToday = day === now.getDate();
 
     let bgStyle = isCompleted 
-      ? 'background:var(--green-accent);color:#060e1e;font-weight:800;box-shadow:0 0 8px rgba(34,197,94,0.7)' 
+      ? 'background:var(--green-accent);color:#060e1e;font-weight:800;box-shadow:0 0 6px rgba(34,197,94,0.7)' 
       : isToday 
-        ? 'border:1.5px solid var(--blue-primary);color:var(--text-main);font-weight:700' 
-        : 'background:rgba(255,255,255,0.06);color:var(--text-main)';
+        ? 'border:1px solid var(--blue-primary);color:var(--text-main);font-weight:700' 
+        : 'background:rgba(255,255,255,0.05);color:var(--text-mut)';
 
     html += `
-      <div style="width:32px;height:32px;margin:3px auto;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:12px;${bgStyle}" title="${dayStr}">
+      <div style="width:26px;height:26px;margin:2px auto;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:10px;${bgStyle}" title="${dayStr}">
         ${day}
       </div>
     `;
