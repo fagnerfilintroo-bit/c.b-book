@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v8';
+var KEY = 'cbbook_v9';
 var state = load() || fresh();
 
 function fresh(){
@@ -6,6 +6,7 @@ function fresh(){
     v:1, logged:false, name:'', email:'', plan:0, ints:[],
     pages:0, goal:30, streak:0, hit:false, words:0,
     prestige: 0, questCompleted: false,
+    activeDays: [], // Array com as strings de datas concluídas (ex: '2026-10-15')
     books: [],
     friends: [],
     qd:0, qt:0, qr:0, qi:0, erros:[], sub:{}, lastSub:'',
@@ -378,6 +379,13 @@ function logPages(){
 
   if(state.pages >= 15) state.questCompleted = true;
 
+  // Marca o dia atual no calendário de constância
+  if(!state.activeDays) state.activeDays = [];
+  let todayStr = new Date().toISOString().split('T')[0];
+  if(!state.activeDays.includes(todayStr)){
+    state.activeDays.push(todayStr);
+  }
+
   save();
   updateUI();
   renderBooks();
@@ -395,6 +403,52 @@ function triggerPrestige(){
   updateUI();
   renderBooks();
   toast('Parabéns! Você zarpou para um novo oceano com Prestígio ' + state.prestige + '!');
+}
+
+function renderConstancyCalendar(){
+  let calendarEl = document.getElementById('constancy-calendar');
+  let monthLabel = document.getElementById('calendar-month-label');
+  if(!calendarEl) return;
+
+  let now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth();
+  
+  let monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  if(monthLabel) monthLabel.textContent = monthNames[month];
+
+  let daysInMonth = new Date(year, month + 1, 0).getDate();
+  let weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+
+  if(!state.activeDays) state.activeDays = [];
+
+  let html = weekDays.map(d => `<div style="font-size:9px;color:var(--text-mut);font-weight:700">${d}</div>`).join('');
+
+  // Descobre o dia da semana do primeiro dia do mês
+  let firstDayIndex = new Date(year, month, 1).getDay();
+  for(let i = 0; i < firstDayIndex; i++){
+    html += `<div></div>`;
+  }
+
+  for(let day = 1; day <= daysInMonth; day++){
+    let dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    let isCompleted = state.activeDays.includes(dayStr);
+    let isToday = day === now.getDate();
+
+    let bgStyle = isCompleted 
+      ? 'background:var(--green-accent);color:#060e1e;font-weight:800;box-shadow:0 0 6px rgba(34,197,94,0.6)' 
+      : isToday 
+        ? 'border:1px solid var(--blue-primary);color:var(--text-main)' 
+        : 'background:rgba(255,255,255,0.04);color:var(--text-mut)';
+
+    html += `
+      <div style="width:24px;height:24px;margin:2px auto;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:10px;${bgStyle}" title="${dayStr}">
+        ${day}
+      </div>
+    `;
+  }
+
+  calendarEl.innerHTML = html;
 }
 
 function updateUI(){
@@ -437,7 +491,6 @@ function updateUI(){
   let nameEl = document.getElementById('hi-name');
   let userName = state.name || 'Fagner';
 
-  // Elementos do topo da página Inicial (Início)
   let homeShipArt = document.getElementById('home-ship-art');
   let homeShipSubtitle = document.getElementById('home-ship-subtitle');
 
@@ -531,6 +584,7 @@ function updateUI(){
   let totalInput = document.getElementById('pg-edit-total');
   if(totalInput) totalInput.value = state.pages;
   
+  renderConstancyCalendar();
   updateActiveBookDisplay();
   renderFriends();
 }
