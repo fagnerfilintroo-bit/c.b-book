@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v15';
+var KEY = 'cbbook_v16';
 var state = load() || fresh();
 
 function fresh(){
@@ -404,50 +404,43 @@ function triggerPrestige(){
   toast('Parabéns! Você zarpou para um novo oceano com Prestígio ' + state.prestige + '!');
 }
 
-// Calendário Compacto Horizontal
-function renderConstancyCalendar(){
-  let calendarEl = document.getElementById('constancy-calendar');
-  let monthLabel = document.getElementById('calendar-month-label');
-  if(!calendarEl) return;
+// RASTREADOR SEMANAL DE FOGUINHOS 🔥
+function renderWeeklyTracker(){
+  let trackerEl = document.getElementById('weekly-streak-tracker');
+  if(!trackerEl) return;
 
+  let daysInitials = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
   let now = new Date();
-  let year = now.getFullYear();
-  let month = now.getMonth();
+  let currentDayOfWeek = now.getDay(); // 0 (Dom) a 6 (Sáb)
   
-  let monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-  if(monthLabel) monthLabel.textContent = monthNames[month];
-
-  let weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   if(!state.activeDays) state.activeDays = [];
 
-  let html = weekDays.map(d => `<div style="font-size:9px;color:#deb887;font-weight:700;padding-bottom:2px">${d}</div>`).join('');
-
-  let daysInMonth = new Date(year, month + 1, 0).getDate();
-  let firstDayIndex = new Date(year, month, 1).getDay();
-
-  for(let i = 0; i < firstDayIndex; i++){
-    html += `<div></div>`;
-  }
-
-  for(let day = 1; day <= daysInMonth; day++){
-    let dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    let isCompleted = state.activeDays.includes(dayStr);
-    let isToday = day === now.getDate();
+  let html = '';
+  for(let i = 0; i < 7; i++){
+    let d = new Date(now);
+    let diff = i - currentDayOfWeek;
+    d.setDate(d.getDate() + diff);
+    let dateStr = d.toISOString().split('T')[0];
+    
+    let isCompleted = state.activeDays.includes(dateStr);
+    let isToday = i === currentDayOfWeek;
 
     let bgStyle = isCompleted 
-      ? 'background:var(--green-accent);color:#060e1e;font-weight:800;box-shadow:0 0 6px rgba(34,197,94,0.7)' 
+      ? 'background: rgba(34,197,94,0.25); border: 1.5px solid var(--green-accent); color: var(--green-accent); box-shadow: 0 0 8px rgba(34,197,94,0.4);' 
       : isToday 
-        ? 'border:1px solid var(--blue-primary);color:var(--text-main);font-weight:700' 
-        : 'background:rgba(255,255,255,0.05);color:var(--text-mut)';
+        ? 'background: rgba(56,189,248,0.15); border: 1.5px solid var(--blue-primary); color: var(--text-main);' 
+        : 'background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-mut);';
 
     html += `
-      <div style="width:26px;height:26px;margin:2px auto;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:10px;${bgStyle}" title="${dayStr}">
-        ${day}
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;" title="${dateStr}">
+        <div style="width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: ${isCompleted ? '16px' : '13px'}; font-weight: 700; ${bgStyle}">
+          ${isCompleted ? '🔥' : daysInitials[i]}
+        </div>
+        <span style="font-size: 10px; color: var(--text-mut);">${daysInitials[i]}</span>
       </div>
     `;
   }
-
-  calendarEl.innerHTML = html;
+  trackerEl.innerHTML = html;
 }
 
 function updateUI(){
@@ -589,7 +582,7 @@ function updateUI(){
   let totalInput = document.getElementById('pg-edit-total');
   if(totalInput) totalInput.value = state.pages;
   
-  renderConstancyCalendar();
+  renderWeeklyTracker();
   updateActiveBookDisplay();
   renderFriends();
 }
