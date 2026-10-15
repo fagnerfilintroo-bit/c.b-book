@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v11';
+var KEY = 'cbbook_v13';
 var state = load() || fresh();
 
 function fresh(){
@@ -417,11 +417,11 @@ function renderConstancyCalendar(){
   if(monthLabel) monthLabel.textContent = monthNames[month];
 
   let daysInMonth = new Date(year, month + 1, 0).getDate();
-  let weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+  let weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
   if(!state.activeDays) state.activeDays = [];
 
-  let html = weekDays.map(d => `<div style="font-size:9px;color:var(--text-mut);font-weight:700">${d}</div>`).join('');
+  let html = weekDays.map(d => `<div style="font-size:10px;color:#deb887;font-weight:700;padding-bottom:4px">${d}</div>`).join('');
 
   let firstDayIndex = new Date(year, month, 1).getDay();
   for(let i = 0; i < firstDayIndex; i++){
@@ -434,13 +434,13 @@ function renderConstancyCalendar(){
     let isToday = day === now.getDate();
 
     let bgStyle = isCompleted 
-      ? 'background:var(--green-accent);color:#060e1e;font-weight:800;box-shadow:0 0 6px rgba(34,197,94,0.6)' 
+      ? 'background:var(--green-accent);color:#060e1e;font-weight:800;box-shadow:0 0 8px rgba(34,197,94,0.7)' 
       : isToday 
-        ? 'border:1px solid var(--blue-primary);color:var(--text-main)' 
-        : 'background:rgba(255,255,255,0.04);color:var(--text-mut)';
+        ? 'border:1.5px solid var(--blue-primary);color:var(--text-main);font-weight:700' 
+        : 'background:rgba(255,255,255,0.06);color:var(--text-main)';
 
     html += `
-      <div style="width:24px;height:24px;margin:2px auto;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:10px;${bgStyle}" title="${dayStr}">
+      <div style="width:32px;height:32px;margin:3px auto;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:12px;${bgStyle}" title="${dayStr}">
         ${day}
       </div>
     `;
@@ -489,8 +489,9 @@ function updateUI(){
   let nameEl = document.getElementById('hi-name');
   let userName = state.name || 'Fagner';
 
-  let homeShipWatermark = document.getElementById('home-ship-watermark');
+  let homeShipArt = document.getElementById('home-ship-art');
   let homeShipSubtitle = document.getElementById('home-ship-subtitle');
+  let homeShipTitleTop = document.getElementById('home-ship-title-top');
 
   let oceans = ['OCEANO DOS CLÁSSICOS', 'MAR DA FILOSOFIA', 'ARQUIPÉLAGO DOS CONCURSOS', 'FROTA IMPERIAL LENDÁRIA'];
   let currentOcean = oceans[Math.min(state.prestige || 0, oceans.length - 1)];
@@ -502,8 +503,9 @@ function updateUI(){
     if(icon3d) icon3d.textContent = '🏴‍☠️✨⛵';
     if(title) title.textContent = 'Nau Capitânia Lendária (Ouro e Carvalho)';
     if(desc) desc.textContent = 'Sua frota domina os mares do conhecimento!';
-    if(homeShipWatermark) homeShipWatermark.textContent = '🏴‍☠️✨⛵';
-    if(homeShipSubtitle) homeShipSubtitle.textContent = '📅 Diário de Bordo • Nau Capitânia Lendária';
+    if(homeShipArt) homeShipArt.textContent = '🏴‍☠️✨⛵';
+    if(homeShipTitleTop) homeShipTitleTop.textContent = 'Nau Capitânia Lendária';
+    if(homeShipSubtitle) homeShipSubtitle.textContent = 'Ouro e Carvalho Maciço • Nível Máximo';
     if(rankTag) rankTag.textContent = 'ALMIRANTE DA FROTA';
     if(badgeIcon) badgeIcon.textContent = '🎖️🎖️🎖️⭐';
     if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px;color:#f59e0b">⚓ Mestre</span>`;
@@ -515,8 +517,9 @@ function updateUI(){
       if(icon3d) icon3d.textContent = '🚢🟫⚓';
       if(title) title.textContent = 'Caravela de Exploração Avançada (Carvalho Escuro)';
       if(desc) desc.textContent = 'Casco reforçado com carvalho escuro e canhões prontos.';
-      if(homeShipWatermark) homeShipWatermark.textContent = '🚢🟫⚓';
-      if(homeShipSubtitle) homeShipSubtitle.textContent = '📅 Diário de Bordo • Caravela Avançada';
+      if(homeShipArt) homeShipArt.textContent = '🚢🟫⚓';
+      if(homeShipTitleTop) homeShipTitleTop.textContent = 'Caravela Avançada';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Carvalho escuro e canhões • Nível 4';
       if(rankTag) rankTag.textContent = 'CAPITÃO DO MAR';
       if(badgeIcon) badgeIcon.textContent = '🎖️🎖️';
       if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px">⚓</span>`;
@@ -525,8 +528,9 @@ function updateUI(){
       if(icon3d) icon3d.textContent = '⛵🪵🧭';
       if(title) title.textContent = 'Caravela de Exploração (Carvalho)';
       if(desc) desc.textContent = 'Velas duplas e textura de madeira tratada.';
-      if(homeShipWatermark) homeShipWatermark.textContent = '⛵🪵🧭';
-      if(homeShipSubtitle) homeShipSubtitle.textContent = '📅 Diário de Bordo • Caravela de Exploração';
+      if(homeShipArt) homeShipArt.textContent = '⛵🪵🧭';
+      if(homeShipTitleTop) homeShipTitleTop.textContent = 'Caravela de Exploração';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Madeira tratada e velas duplas • Nível 3';
       if(rankTag) rankTag.textContent = 'TENENTE DO MAR';
       if(badgeIcon) badgeIcon.textContent = '🎖️';
       if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px">⚓</span>`;
@@ -535,18 +539,20 @@ function updateUI(){
       if(icon3d) icon3d.textContent = '🛶🪵';
       if(title) title.textContent = 'Barco de Pesca / Tronco Envernizado';
       if(desc) desc.textContent = 'O mastro de madeira rústica começa a guiar sua rotina.';
-      if(homeShipWatermark) homeShipWatermark.textContent = '🛶🪵';
-      if(homeShipSubtitle) homeShipSubtitle.textContent = '📅 Diário de Bordo • Barco de Pesca';
+      if(homeShipArt) homeShipArt.textContent = '🛶🪵';
+      if(homeShipTitleTop) homeShipTitleTop.textContent = 'Barco de Pesca';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Troncos envernizados • Nível 2';
       if(rankTag) rankTag.textContent = 'MARINHEIRO';
       if(badgeIcon) badgeIcon.textContent = '🏅';
       if(nameEl) nameEl.innerHTML = `${userName}`;
     } else {
       if(badge) badge.textContent = 'Nível 1';
-      if(icon3d) icon3d.textContent = '🪵🛶';
+      if(icon3d) icon3d.textContent = '⛵🪵';
       if(title) title.textContent = 'Jangada de Toras (Madeira Bruta)';
       if(desc) desc.textContent = 'O ponto de partida do navegador em toras de madeira.';
-      if(homeShipWatermark) homeShipWatermark.textContent = '🪵🛶';
-      if(homeShipSubtitle) homeShipSubtitle.textContent = '📅 Diário de Bordo • Jangada de Toras';
+      if(homeShipArt) homeShipArt.textContent = '⛵🪵';
+      if(homeShipTitleTop) homeShipTitleTop.textContent = 'Embarcação de Madeira';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Estrutura robusta de partida • Nível 1';
       if(rankTag) rankTag.textContent = 'RECRUTA';
       if(badgeIcon) badgeIcon.textContent = '🎖️';
       if(nameEl) nameEl.innerHTML = `${userName}`;
