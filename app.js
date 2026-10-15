@@ -373,35 +373,6 @@ function stepAmt(delta){
   document.getElementById('amt').textContent = currentAdd;
 }
 
-function logPages(){
-  let sel = document.getElementById('log-book-select');
-  let targetBookId = selectedBookIdForLog || (sel ? parseInt(sel.value) : null);
-
-  let book = state.books.find(b => b.id === targetBookId);
-  if(!book){
-    toast('Selecione um livro válido');
-    return;
-  }
-
-  book.pages = Math.min(book.total, book.pages + currentAdd);
-  recalculateTotalPages();
-  state.streak = 1;
-
-  if(state.pages >= 15) state.questCompleted = true;
-
-  if(!state.activeDays) state.activeDays = [];
-  let todayStr = new Date().toISOString().split('T')[0];
-  if(!state.activeDays.includes(todayStr)){
-    state.activeDays.push(todayStr);
-  }
-
-  save();
-  updateUI();
-  renderBooks();
-  closeSheets();
-  toast('Leitura registrada para ' + book.title + '!');
-}
-
 function triggerPrestige(){
   state.prestige = (state.prestige || 0) + 1;
   state.pages = 0;
@@ -412,45 +383,6 @@ function triggerPrestige(){
   updateUI();
   renderBooks();
   toast('Parabéns! Você zarpou para um novo oceano com Prestígio ' + state.prestige + '!');
-}
-
-// RASTREADOR SEMANAL DE FOGUINHOS 🔥
-function renderWeeklyTracker(){
-  let trackerEl = document.getElementById('weekly-streak-tracker');
-  if(!trackerEl) return;
-
-  let daysInitials = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-  let now = new Date();
-  let currentDayOfWeek = now.getDay(); // 0 (Dom) a 6 (Sáb)
-  
-  if(!state.activeDays) state.activeDays = [];
-
-  let html = '';
-  for(let i = 0; i < 7; i++){
-    let d = new Date(now);
-    let diff = i - currentDayOfWeek;
-    d.setDate(d.getDate() + diff);
-    let dateStr = d.toISOString().split('T')[0];
-    
-    let isCompleted = state.activeDays.includes(dateStr);
-    let isToday = i === currentDayOfWeek;
-
-    let bgStyle = isCompleted 
-      ? 'background: rgba(34,197,94,0.25); border: 1.5px solid var(--green-accent); color: var(--green-accent); box-shadow: 0 0 8px rgba(34,197,94,0.4);' 
-      : isToday 
-        ? 'background: rgba(56,189,248,0.15); border: 1.5px solid var(--blue-primary); color: var(--text-main);' 
-        : 'background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-mut);';
-
-    html += `
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;" title="${dateStr}">
-        <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: ${isCompleted ? '15px' : '12px'}; font-weight: 700; ${bgStyle}">
-          ${isCompleted ? '🔥' : daysInitials[i]}
-        </div>
-        <span style="font-size: 10px; color: var(--text-mut);">${daysInitials[i]}</span>
-      </div>
-    `;
-  }
-  trackerEl.innerHTML = html;
 }
 
 function updateUI(){
@@ -613,5 +545,248 @@ window.onload = function(){
     initApp();
   } else {
     go('s-login');
+  }
+};
+
+/* ================= CARAVELA + DIÁRIO DE BORDO ================= */
+var DAILY_GOAL = 15; // páginas para "completar a leitura do dia" (mesma missão do Vento nos Castelos)
+
+/* ---------- Datas (horário LOCAL, sem o bug do UTC) ---------- */
+function dayKey(d){
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function isDone(key){
+  if(state.daily && key in state.daily) return state.daily[key] >= DAILY_GOAL;
+  return !!(state.activeDays && state.activeDays.includes(key)); // dados antigos
+}
+
+function calcStreak(){
+  var d = new Date();
+  if(!isDone(dayKey(d))) d.setDate(d.getDate() - 1); // hoje ainda pode ser concluído
+  var n = 0;
+  while(isDone(dayKey(d))){ n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+
+/* ---------- Registro de leitura (agora guarda páginas por dia) ---------- */
+function logPages(){
+  var sel = document.getElementById('log-book-select');
+  var targetBookId = selectedBookIdForLog || (sel ? parseInt(sel.value) : null);
+  var book = state.books.find(function(b){ return b.id === targetBookId; });
+  if(!book){ toast('Selecione um livro válido'); return; }
+
+  var before = book.pages;
+  book.pages = Math.min(book.total, book.pages + currentAdd);
+  var added = book.pages - before;
+  if(added <= 0){ toast('Esse livro já está concluído'); closeSheets(); return; }
+  recalculateTotalPages();
+
+  var key = dayKey(new Date());
+  if(!state.daily) state.daily = {};
+  var wasDone = isDone(key);
+  state.daily[key] = (state.daily[key] || 0) + added;
+  var nowDone = state.daily[key] >= DAILY_GOAL;
+
+  if(!state.activeDays) state.activeDays = [];
+  if(nowDone && !state.activeDays.includes(key)) state.activeDays.push(key);
+  state.questCompleted = nowDone;
+  state.streak = calcStreak();
+
+  save();
+  updateUI();
+  renderBooks();
+  closeSheets();
+  if(nowDone && !wasDone) toast('🔥 Leitura do dia concluída! Sequência: ' + state.streak);
+  else toast('Leitura registrada para ' + book.title + '!');
+}
+
+/* ---------- Diário de Bordo (bolinhas D S T Q Q S S) ---------- */
+var DIAS_NOME = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+var DIAS_INI  = ['D','S','T','Q','Q','S','S'];
+
+function dayInfo(key, idx){
+  var p = (state.daily && state.daily[key]) || 0;
+  toast(DIAS_NOME[idx] + ': ' + p + ' de ' + DAILY_GOAL + ' páginas' + (isDone(key) ? ' 🔥' : ''));
+}
+
+function renderWeeklyTracker(){
+  var el = document.getElementById('weekly-streak-tracker');
+  if(!el) return;
+  var now = new Date();
+  var dow = now.getDay();
+  var cols = '';
+
+  for(var i = 0; i < 7; i++){
+    var d = new Date(now);
+    d.setDate(now.getDate() + i - dow);
+    var key = dayKey(d);
+    var done = isDone(key);
+    var today = i === dow;
+    var future = i > dow;
+    var pages = (state.daily && state.daily[key]) || 0;
+
+    var style;
+    if(done) style = 'background:linear-gradient(145deg,#fb923c,#ea580c);border:2px solid #fdba74;color:#fff;box-shadow:0 0 12px rgba(249,115,22,.65);';
+    else if(today) style = 'background:rgba(56,189,248,.15);border:2px solid var(--blue-primary);color:var(--text-main);';
+    else style = 'background:rgba(255,255,255,.05);border:1px solid var(--border-color);color:var(--text-mut);' + (future ? 'opacity:.45;' : '');
+
+    cols += '<div onclick="dayInfo(\'' + key + '\',' + i + ')" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer">' +
+      '<div style="position:relative;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;' + style + '">' +
+        DIAS_INI[i] +
+        (done ? '<span class="cb-fire" style="position:absolute;top:-9px;right:-6px;font-size:15px">🔥</span>' : '') +
+      '</div>' +
+      '<span style="font-size:10px;color:' + (done ? '#fdba74' : 'var(--text-mut)') + '">' + (pages > 0 ? pages + 'p' : '·') + '</span>' +
+    '</div>';
+  }
+
+  el.style.flexDirection = 'column';
+  el.style.alignItems = 'center';
+  el.style.gap = '0';
+  el.innerHTML =
+    '<div style="font-size:11px;letter-spacing:.08em;color:#deb887;margin-bottom:12px">📖 DIÁRIO DE BORDO · meta ' + DAILY_GOAL + ' pág/dia</div>' +
+    '<div style="display:flex;justify-content:center;gap:10px">' + cols + '</div>' +
+    '<div style="font-size:11px;margin-top:10px;color:#a0aec0">🔥 ' + calcStreak() + ' dia(s) seguidos</div>';
+}
+
+/* ---------- Caravela em SVG (evolui com as 12 peças) ---------- */
+function caravelSVG(pieces, prestige, pre){
+  pieces = Math.max(0, Math.min(12, pieces));
+  var P = function(n){ return pieces >= n; };
+  var type = P(9) ? 'caravel' : (P(3) ? 'boat' : 'raft');
+  var gold = P(12);
+
+  var wood = '#a0642a', woodDark = '#5b3513', woodLight = '#c58a4a', goldC = '#f5b82e', sail = '#f6eed8', rope = '#d9bf8c';
+  var deckY  = type === 'caravel' ? 126 : (type === 'boat' ? 138 : 146);
+  var sternX = type === 'caravel' ? 50  : (type === 'boat' ? 70  : 78);
+  var bowX   = type === 'caravel' ? 256 : (type === 'boat' ? 230 : 222);
+  var mastX = 150;
+  var mastTop = type === 'caravel' ? 32 : 66;
+
+  function wave(y, amp, len, fill){
+    var d = 'M0 ' + y + ' q' + (len / 2) + ' ' + (-amp) + ' ' + len + ' 0';
+    for(var i = 1; i < Math.ceil(300 / len); i++) d += ' t' + len + ' 0';
+    return '<path d="' + d + ' V220 H0 Z" fill="' + fill + '"/>';
+  }
+
+  var s = '<svg viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Embarcação com ' + pieces + ' de 12 peças" style="width:100%;max-width:300px;height:auto;display:block;margin:0 auto">';
+  s += '<defs>' +
+    '<linearGradient id="' + pre + 'hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + woodLight + '"/><stop offset="1" stop-color="' + wood + '"/></linearGradient>' +
+    '<radialGradient id="' + pre + 'glow"><stop offset="0" stop-color="#f5b82e" stop-opacity=".45"/><stop offset="1" stop-color="#f5b82e" stop-opacity="0"/></radialGradient>' +
+    '<style>.cv-bob{animation:cvb 4.5s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 90%}@keyframes cvb{0%,100%{transform:translateY(0) rotate(-.8deg)}50%{transform:translateY(-3px) rotate(.8deg)}}@media(prefers-reduced-motion:reduce){.cv-bob{animation:none}}</style>' +
+    '</defs>';
+
+  if(gold) s += '<circle cx="150" cy="105" r="115" fill="url(#' + pre + 'glow)"/>';
+  for(var k = 0; k < Math.min(prestige || 0, 5); k++) s += '<text x="' + (16 + k * 18) + '" y="24" font-size="15" fill="' + goldC + '">★</text>';
+
+  s += wave(174, 7, 36, 'rgba(30,64,120,.55)');
+  s += '<g class="cv-bob">';
+
+  /* --- Casco --- */
+  if(type === 'raft'){
+    var ys = [168, 157, 146], n = P(1) ? 3 : 1;
+    for(var i = 0; i < n; i++){
+      var y = n === 1 ? 168 : ys[i];
+      s += '<rect x="' + sternX + '" y="' + y + '" width="144" height="11" rx="5.5" fill="url(#' + pre + 'hull)" stroke="' + woodDark + '" stroke-width="1.5"/>' +
+           '<circle cx="' + (bowX - 6) + '" cy="' + (y + 5.5) + '" r="3.5" fill="' + woodLight + '" stroke="' + woodDark + '"/>';
+    }
+  } else if(type === 'boat'){
+    s += '<path d="M70 138 L230 138 Q222 168 190 177 L110 177 Q78 168 70 138 Z" fill="url(#' + pre + 'hull)" stroke="' + woodDark + '" stroke-width="2"/>' +
+         '<path d="M74 150 H226 M80 163 H220" stroke="' + woodDark + '" stroke-opacity=".5" stroke-width="1.5"/>' +
+         '<path d="M66 136 H234" stroke="' + woodLight + '" stroke-width="4" stroke-linecap="round"/>';
+  } else {
+    s += '<path d="M50 108 L100 108 L100 128 L236 124 L256 112 Q250 160 214 176 L96 178 Q60 168 50 138 Z" fill="url(#' + pre + 'hull)" stroke="' + woodDark + '" stroke-width="2.2" stroke-linejoin="round"/>' +
+         '<path d="M51 130 Q150 148 252 124 M54 147 Q150 163 244 145 M64 161 Q150 173 232 161" fill="none" stroke="' + woodDark + '" stroke-opacity=".45" stroke-width="1.5"/>' +
+         '<path d="M250 118 L288 96" stroke="' + woodDark + '" stroke-width="4" stroke-linecap="round"/>';
+    if(gold) s += '<path d="M50 108 L100 108 L100 128 L236 124 L256 112" fill="none" stroke="' + goldC + '" stroke-width="3.5" stroke-linejoin="round"/>' +
+                  '<path d="M52 136 Q150 154 250 130" fill="none" stroke="' + goldC + '" stroke-width="2.2"/>';
+    s += '<circle cx="64" cy="120" r="3.2" fill="' + (gold ? goldC : '#1f2937') + '"/><circle cx="80" cy="120" r="3.2" fill="' + (gold ? goldC : '#1f2937') + '"/>';
+  }
+
+  /* 2 — corda de amarra */
+  if(P(2)){
+    var rx = type === 'caravel' ? 122 : sternX + 30;
+    s += '<ellipse cx="' + rx + '" cy="' + (deckY - 3) + '" rx="9" ry="4" fill="none" stroke="' + rope + '" stroke-width="2.5"/>' +
+         '<ellipse cx="' + rx + '" cy="' + (deckY - 3) + '" rx="4.5" ry="2" fill="none" stroke="' + rope + '" stroke-width="2"/>' +
+         '<path d="M' + (bowX - 4) + ' ' + (deckY + 4) + ' Q' + (bowX + 14) + ' ' + (deckY + 22) + ' ' + (bowX + 24) + ' 170" fill="none" stroke="' + rope + '" stroke-width="2"/>';
+  }
+  /* 3 — remos */
+  if(P(3)){
+    [128, 172].forEach(function(x){
+      s += '<path d="M' + x + ' ' + (deckY + 12) + ' L' + (x - 22) + ' 178" stroke="' + woodDark + '" stroke-width="3" stroke-linecap="round"/>' +
+           '<path d="M' + (x - 19) + ' 172 L' + (x - 24) + ' 184" stroke="' + woodLight + '" stroke-width="7" stroke-linecap="round"/>';
+    });
+  }
+  /* 6 — leme */
+  if(P(6)){
+    s += '<path d="M' + (sternX - 2) + ' ' + (deckY + 4) + ' L' + (sternX - 12) + ' ' + (deckY + 44) + ' L' + (sternX + 2) + ' ' + (deckY + 46) + ' L' + (sternX + 6) + ' ' + (deckY + 10) + ' Z" fill="' + (gold ? goldC : woodDark) + '" stroke="' + woodDark + '" stroke-width="1.5"/>';
+  }
+
+  /* 4 — mastro central */
+  if(P(4)) s += '<rect x="' + (mastX - 3) + '" y="' + mastTop + '" width="6" height="' + (deckY - mastTop) + '" fill="' + woodDark + '"/>';
+
+  /* 7 — mastros menores, velas latinas e cordame */
+  var fTop = deckY - 62, mx = type === 'caravel' ? 80 : sternX + 28, mBase = type === 'caravel' ? 108 : deckY, mTop = mBase - 50;
+  if(P(7)){
+    s += '<path d="M' + mastX + ' ' + mastTop + ' L' + (bowX - 2) + ' ' + (deckY - 4) + ' M' + mastX + ' ' + mastTop + ' L' + (sternX + 4) + ' ' + (mBase - 2) + '" stroke="' + rope + '" stroke-width="1" fill="none"/>' +
+         '<rect x="209" y="' + fTop + '" width="5" height="' + (deckY - fTop) + '" fill="' + woodDark + '"/>' +
+         '<rect x="' + (mx - 2.5) + '" y="' + mTop + '" width="5" height="' + (mBase - mTop) + '" fill="' + woodDark + '"/>' +
+         '<path d="M211 ' + fTop + ' L' + (bowX - 6) + ' ' + (deckY - 12) + ' L192 ' + (deckY - 12) + ' Z" fill="' + sail + '" stroke="#cdbb8b" stroke-width="1.2"/>' +
+         '<path d="M211 ' + fTop + ' L' + (bowX - 6) + ' ' + (deckY - 12) + '" stroke="' + woodDark + '" stroke-width="2"/>' +
+         '<path d="M' + mx + ' ' + mTop + ' L' + (mx - 30) + ' ' + (mBase - 8) + ' L' + (mx + 14) + ' ' + (mBase - 8) + ' Z" fill="' + sail + '" stroke="#cdbb8b" stroke-width="1.2"/>';
+  }
+
+  /* 5 — vela principal com a Cruz de Cristo */
+  if(P(5)){
+    var y1 = mastTop + 14, y2 = y1 + (type === 'caravel' ? 64 : 48), cy = (y1 + y2) / 2 + 4, cx = mastX;
+    s += '<rect x="104" y="' + (y1 - 3) + '" width="92" height="5" rx="2" fill="' + woodDark + '"/>' +
+         '<path d="M112 ' + y1 + ' Q150 ' + (y1 + 10) + ' 188 ' + y1 + ' L184 ' + y2 + ' Q150 ' + (y2 + 12) + ' 116 ' + y2 + ' Z" fill="' + sail + '" stroke="' + (gold ? goldC : '#cdbb8b') + '" stroke-width="' + (gold ? 2.2 : 1.3) + '"/>' +
+         '<path d="M' + (cx - 4) + ' ' + (cy - 16) + ' H' + (cx + 4) + ' V' + (cy - 4) + ' H' + (cx + 16) + ' V' + (cy + 4) + ' H' + (cx + 4) + ' V' + (cy + 16) + ' H' + (cx - 4) + ' V' + (cy + 4) + ' H' + (cx - 16) + ' V' + (cy - 4) + ' H' + (cx - 4) + ' Z" fill="#b91c1c"/>';
+  }
+
+  /* 8 — gávea (cesto do vigia) */
+  if(P(8)) s += '<path d="M' + (mastX - 10) + ' ' + (mastTop - 2) + ' L' + (mastX + 10) + ' ' + (mastTop - 2) + ' L' + (mastX + 7) + ' ' + (mastTop + 9) + ' L' + (mastX - 7) + ' ' + (mastTop + 9) + ' Z" fill="' + woodDark + '" stroke="' + woodLight + '" stroke-width="1.2"/>';
+
+  /* 10 — estandarte */
+  if(P(10)){
+    var t = mastTop;
+    s += '<path d="M' + mastX + ' ' + (t - 2) + ' V' + (t - 18) + '" stroke="' + woodDark + '" stroke-width="2"/>' +
+         '<path d="M' + mastX + ' ' + (t - 18) + ' Q168 ' + (t - 24) + ' 186 ' + (t - 16) + ' Q168 ' + (t - 8) + ' ' + mastX + ' ' + (t - 8) + ' Z" fill="' + (gold ? goldC : '#b91c1c') + '" stroke="' + woodDark + '" stroke-width=".8"/>';
+  }
+
+  /* 11 — canhões */
+  if(P(11)) [112, 142, 172, 202].forEach(function(x){
+    s += '<circle cx="' + x + '" cy="' + (deckY + 15) + '" r="4.4" fill="#1f2937" stroke="' + (gold ? goldC : woodLight) + '" stroke-width="1.4"/>';
+  });
+
+  s += '</g>';
+  s += wave(180, 6, 30, 'rgba(14,40,86,.88)');
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- Ligação com o app (envolve o updateUI original) ---------- */
+(function(){
+  var css = document.createElement('style');
+  css.textContent = '@keyframes cbfire{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.18) rotate(4deg)}}.cb-fire{display:inline-block;animation:cbfire 1.2s ease-in-out infinite}@media(prefers-reduced-motion:reduce){.cb-fire{animation:none}}';
+  document.head.appendChild(css);
+})();
+
+var _baseUpdateUI = updateUI;
+updateUI = function(){
+  state.streak = calcStreak();
+  _baseUpdateUI();
+
+  var pieces = Math.min(12, Math.floor((state.pages || 0) / 20));
+  var home = document.getElementById('home-ship-art');
+  if(home){ home.style.fontSize = '0'; home.innerHTML = caravelSVG(pieces, state.prestige, 'h'); }
+  var dev = document.getElementById('ship-3d-icon');
+  if(dev){ dev.style.fontSize = '0'; dev.innerHTML = caravelSVG(pieces, state.prestige, 'd'); }
+
+  var today = (state.daily && state.daily[dayKey(new Date())]) || 0;
+  var q = document.getElementById('quest-status');
+  if(q){
+    if(today >= DAILY_GOAL){ q.textContent = 'Concluído 🔥'; q.style.color = 'var(--green-accent)'; }
+    else { q.textContent = today + '/' + DAILY_GOAL + ' pág'; q.style.color = 'var(--text-mut)'; }
   }
 };
