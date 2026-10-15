@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v9';
+var KEY = 'cbbook_v10';
 var state = load() || fresh();
 
 function fresh(){
@@ -6,7 +6,7 @@ function fresh(){
     v:1, logged:false, name:'', email:'', plan:0, ints:[],
     pages:0, goal:30, streak:0, hit:false, words:0,
     prestige: 0, questCompleted: false,
-    activeDays: [], // Array com as strings de datas concluídas (ex: '2026-10-15')
+    activeDays: [],
     books: [],
     friends: [],
     qd:0, qt:0, qr:0, qi:0, erros:[], sub:{}, lastSub:'',
@@ -379,7 +379,6 @@ function logPages(){
 
   if(state.pages >= 15) state.questCompleted = true;
 
-  // Marca o dia atual no calendário de constância
   if(!state.activeDays) state.activeDays = [];
   let todayStr = new Date().toISOString().split('T')[0];
   if(!state.activeDays.includes(todayStr)){
@@ -424,7 +423,6 @@ function renderConstancyCalendar(){
 
   let html = weekDays.map(d => `<div style="font-size:9px;color:var(--text-mut);font-weight:700">${d}</div>`).join('');
 
-  // Descobre o dia da semana do primeiro dia do mês
   let firstDayIndex = new Date(year, month, 1).getDay();
   for(let i = 0; i < firstDayIndex; i++){
     html += `<div></div>`;
