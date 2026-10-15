@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v16';
+var KEY = 'cbbook_v17';
 var state = load() || fresh();
 
 function fresh(){
@@ -35,6 +35,16 @@ function go(id){
   document.querySelectorAll('.sc').forEach(el => el.classList.remove('act'));
   let target = document.getElementById(id);
   if(target) target.classList.add('act');
+  
+  // Controla a visibilidade da barra de navegação inferior
+  let nav = document.getElementById('main-nav');
+  if(nav){
+    if(id === 's-app'){
+      nav.style.display = 'flex';
+    } else {
+      nav.style.display = 'none';
+    }
+  }
 }
 
 function tab(name){
@@ -433,7 +443,7 @@ function renderWeeklyTracker(){
 
     html += `
       <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;" title="${dateStr}">
-        <div style="width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: ${isCompleted ? '16px' : '13px'}; font-weight: 700; ${bgStyle}">
+        <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: ${isCompleted ? '15px' : '12px'}; font-weight: 700; ${bgStyle}">
           ${isCompleted ? '🔥' : daysInitials[i]}
         </div>
         <span style="font-size: 10px; color: var(--text-mut);">${daysInitials[i]}</span>
@@ -593,12 +603,13 @@ function initApp(){
   renderFriends();
   if(state.logged){
     go('s-app');
+  } else {
+    go('s-login');
   }
 }
 
 window.onload = function(){
   if(state.logged){
-    go('s-app');
     initApp();
   } else {
     go('s-login');
