@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v7';
+var KEY = 'cbbook_v8';
 var state = load() || fresh();
 
 function fresh(){
@@ -433,8 +433,13 @@ function updateUI(){
   let prestigeStars = document.getElementById('prestige-stars');
   
   let rankTag = document.getElementById('hi-rank-tag');
+  let badgeIcon = document.getElementById('hi-badge-icon');
   let nameEl = document.getElementById('hi-name');
   let userName = state.name || 'Fagner';
+
+  // Elementos do topo da página Inicial (Início)
+  let homeShipArt = document.getElementById('home-ship-art');
+  let homeShipSubtitle = document.getElementById('home-ship-subtitle');
 
   let oceans = ['OCEANO DOS CLÁSSICOS', 'MAR DA FILOSOFIA', 'ARQUIPÉLAGO DOS CONCURSOS', 'FROTA IMPERIAL LENDÁRIA'];
   let currentOcean = oceans[Math.min(state.prestige || 0, oceans.length - 1)];
@@ -443,41 +448,56 @@ function updateUI(){
 
   if(piecesEarned >= 12){
     if(badge) badge.textContent = 'Nível Máximo';
-    if(icon3d) icon3d.textContent = '🏴‍☠️✨';
-    if(title) title.textContent = 'Nau Capitânia Lendária';
-    if(desc) desc.textContent = 'Sua frota domina os mares do conhecimento! Pronto para zarpar rumo ao próximo oceano.';
-    if(rankTag) rankTag.textContent = 'ALMIRANTE DA FROTA 🎖️🎖️🎖️';
-    if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:16px">⭐</span>`;
+    if(icon3d) icon3d.textContent = '🏴‍☠️✨⛵';
+    if(title) title.textContent = 'Nau Capitânia Lendária (Ouro e Carvalho)';
+    if(desc) desc.textContent = 'Sua frota domina os mares do conhecimento!';
+    if(homeShipArt) homeShipArt.textContent = '🏴‍☠️✨⛵';
+    if(homeShipSubtitle) homeShipSubtitle.textContent = 'Nau Capitânia Lendária • Nível Máximo';
+    if(rankTag) rankTag.textContent = 'ALMIRANTE DA FROTA';
+    if(badgeIcon) badgeIcon.textContent = '🎖️🎖️🎖️⭐';
+    if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px;color:#f59e0b">⚓ Mestre</span>`;
     if(prestigeContainer) prestigeContainer.style.display = 'block';
   } else {
     if(prestigeContainer) prestigeContainer.style.display = 'none';
     if(piecesEarned >= 9){
       if(badge) badge.textContent = 'Nível 4';
-      if(icon3d) icon3d.textContent = '🚢🟫';
-      if(title) title.textContent = 'Caravela de Exploração Avançada (Madeira Nobre)';
+      if(icon3d) icon3d.textContent = '🚢🟫⚓';
+      if(title) title.textContent = 'Caravela de Exploração Avançada (Carvalho Escuro)';
       if(desc) desc.textContent = 'Casco reforçado com carvalho escuro e canhões prontos.';
-      if(rankTag) rankTag.textContent = 'CAPITÃO 🎖️🎖️';
-      if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:16px">⚓</span>`;
+      if(homeShipArt) homeShipArt.textContent = '🚢🟫⚓';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Caravela Avançada • Nível 4';
+      if(rankTag) rankTag.textContent = 'CAPITÃO DO MAR';
+      if(badgeIcon) badgeIcon.textContent = '🎖️🎖️';
+      if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px">⚓</span>`;
     } else if(piecesEarned >= 6){
       if(badge) badge.textContent = 'Nível 3';
-      if(icon3d) icon3d.textContent = '⛵🪵';
+      if(icon3d) icon3d.textContent = '⛵🪵🧭';
       if(title) title.textContent = 'Caravela de Exploração (Carvalho)';
-      if(desc) desc.textContent = 'Velas duplas e textura de madeira tratada para longas jornadas.';
-      if(rankTag) rankTag.textContent = 'TENENTE DO MAR 🎖️';
-      if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:16px">⚓</span>`;
+      if(desc) desc.textContent = 'Velas duplas e textura de madeira tratada.';
+      if(homeShipArt) homeShipArt.textContent = '⛵🪵🧭';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Caravela de Exploração • Nível 3';
+      if(rankTag) rankTag.textContent = 'TENENTE DO MAR';
+      if(badgeIcon) badgeIcon.textContent = '🎖️';
+      if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px">⚓</span>`;
     } else if(piecesEarned >= 3){
       if(badge) badge.textContent = 'Nível 2';
       if(icon3d) icon3d.textContent = '🛶🪵';
       if(title) title.textContent = 'Barco de Pesca / Tronco Envernizado';
       if(desc) desc.textContent = 'O mastro de madeira rústica começa a guiar sua rotina.';
-      if(rankTag) rankTag.textContent = 'MARINHEIRO 🏅';
+      if(homeShipArt) homeShipArt.textContent = '🛶🪵';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Barco de Pesca • Nível 2';
+      if(rankTag) rankTag.textContent = 'MARINHEIRO';
+      if(badgeIcon) badgeIcon.textContent = '🏅';
       if(nameEl) nameEl.innerHTML = `${userName}`;
     } else {
       if(badge) badge.textContent = 'Nível 1';
       if(icon3d) icon3d.textContent = '🪵🛶';
       if(title) title.textContent = 'Jangada de Toras (Madeira Bruta)';
       if(desc) desc.textContent = 'O ponto de partida do navegador em toras de madeira.';
-      if(rankTag) rankTag.textContent = 'RECRUTA 🎖️';
+      if(homeShipArt) homeShipArt.textContent = '🪵🛶';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Jangada de Toras • Nível 1';
+      if(rankTag) rankTag.textContent = 'RECRUTA';
+      if(badgeIcon) badgeIcon.textContent = '🎖️';
       if(nameEl) nameEl.innerHTML = `${userName}`;
     }
   }
