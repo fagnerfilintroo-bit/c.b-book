@@ -116,9 +116,20 @@
 <!-- INÍCIO -->
 <div class="v act" id="v-hoje" style="padding-bottom:100px">
 <!-- Caravela Estruturada em Textura de Madeira no Topo -->
-<div id="home-ship-container" style="position:relative;width:100%;height:140px;background:linear-gradient(180deg, rgba(139,69,19,0.25) 0%, rgba(6,14,30,0.95) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:1px solid rgba(210,105,30,0.3);overflow:hidden;">
-  <div id="home-ship-art" style="font-size:52px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.7));transition:transform 0.4s ease;">🪵🛶</div>
-  <div class="mut" id="home-ship-subtitle" style="font-size:11px;margin-top:4px;letter-spacing:0.05em;color:#deb887">Jangada de Toras • Nível 1</div>
+<div id="home-ship-container" style="position:relative;width:100%;background:linear-gradient(180deg, rgba(139,69,19,0.25) 0%, rgba(6,14,30,0.95) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:1px solid rgba(210,105,30,0.3);padding:14px 16px 10px;overflow:hidden;">
+  <div id="home-ship-art" style="font-size:48px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.7));transition:transform 0.4s ease;">🪵🛶</div>
+  <div class="mut" id="home-ship-subtitle" style="font-size:11px;margin-top:2px;letter-spacing:0.05em;color:#deb887">Jangada de Toras • Nível 1</div>
+
+  <!-- Calendário de Constância (Bolinhas de Dias Concluídos) -->
+  <div style="width:100%;margin-top:10px;padding-top:8px;border-top:1px dashed rgba(210,105,30,0.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span class="mut" style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em">Diário de Bordo (Dias do Mês)</span>
+      <span class="mut" id="calendar-month-label" style="font-size:10px;color:#deb887">Outubro</span>
+    </div>
+    <div id="constancy-calendar" style="display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;text-align:center;">
+      <!-- Preenchido dinamicamente via JS -->
+    </div>
+  </div>
 </div>
 
 <div style="padding:16px 20px 8px;display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2">
