@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v13';
+var KEY = 'cbbook_v14';
 var state = load() || fresh();
 
 function fresh(){
@@ -50,11 +50,12 @@ function tab(name){
 function login(){
   let m = document.getElementById('lg-mail').value;
   let p = document.getElementById('lg-pass').value;
-  if(!m || !p){ toast('Preencha e-mail e senha'); return; }
+  
   state.logged = true;
-  state.email = m;
-  state.name = m.split('@')[0];
+  state.email = m || 'fagner@email.com';
+  state.name = m ? m.split('@')[0] : 'Fagner';
   state.name = state.name.charAt(0).toUpperCase() + state.name.slice(1);
+  
   save();
   initApp();
   go('s-app');
@@ -302,4 +303,311 @@ function renderFriends(){
 
   let sorted = [...state.friends].sort((a,b) => b.pages - a.pages);
 
-  list.innerHTML = sorted.map((f, idx)
+  list.innerHTML = sorted.map((f, idx) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-color)">
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--text-main)">${idx === 0 ? '👑 ' : idx === 1 ? '🥈 ' : '⚓ '} ${f.name}</div>
+        <div class="mut" style="font-size:11px">${f.level}</div>
+      </div>
+      <div style="text-align:right">
+        <span class="sf" style="color:var(--blue-primary);font-size:16px">${f.pages}</span>
+        <span class="mut" style="font-size:11px"> pág</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function populateBookSelect(){
+  let sel = document.getElementById('log-book-select');
+  if(!sel) return;
+  if(!state.books || state.books.length === 0){
+    sel.innerHTML = `<option value="">Nenhum livro cadastrado</option>`;
+    return;
+  }
+  sel.innerHTML = state.books.map(b => `<option value="${b.id}">${b.title} (${b.pages}/${b.total} pág)</option>`).join('');
+}
+
+let activeNoteBookId = null;
+
+function openNotesModal(bookId){
+  activeNoteBookId = bookId;
+  let book = state.books.find(b => b.id === bookId);
+  if(!book) return;
+  document.getElementById('notes-book-title').textContent = book.title;
+  document.getElementById('bk-notes-text').value = book.notes || '';
+  document.getElementById('scrim').classList.add('act');
+  document.getElementById('notes-sheet').classList.add('act');
+}
+
+function saveBookNotes(){
+  if(activeNoteBookId === null) return;
+  let book = state.books.find(b => b.id === activeNoteBookId);
+  if(book){
+    book.notes = document.getElementById('bk-notes-text').value;
+    save();
+    toast('Anotações salvas com sucesso!');
+  }
+  closeSheets();
+}
+
+function closeSheets(){
+  document.getElementById('scrim').classList.remove('act');
+  document.getElementById('sheet').classList.remove('act');
+  document.getElementById('book-sheet').classList.remove('act');
+  document.getElementById('notes-sheet').classList.remove('act');
+  document.getElementById('friend-sheet').classList.remove('act');
+  document.getElementById('ed').classList.remove('act');
+}
+
+function stepAmt(delta){
+  currentAdd = Math.max(5, currentAdd + delta);
+  document.getElementById('amt').textContent = currentAdd;
+}
+
+function logPages(){
+  let sel = document.getElementById('log-book-select');
+  let targetBookId = selectedBookIdForLog || (sel ? parseInt(sel.value) : null);
+
+  let book = state.books.find(b => b.id === targetBookId);
+  if(!book){
+    toast('Selecione um livro válido');
+    return;
+  }
+
+  book.pages = Math.min(book.total, book.pages + currentAdd);
+  recalculateTotalPages();
+  state.streak = 1;
+
+  if(state.pages >= 15) state.questCompleted = true;
+
+  if(!state.activeDays) state.activeDays = [];
+  let todayStr = new Date().toISOString().split('T')[0];
+  if(!state.activeDays.includes(todayStr)){
+    state.activeDays.push(todayStr);
+  }
+
+  save();
+  updateUI();
+  renderBooks();
+  closeSheets();
+  toast('Leitura registrada para ' + book.title + '!');
+}
+
+function triggerPrestige(){
+  state.prestige = (state.prestige || 0) + 1;
+  state.pages = 0;
+  if(state.books){
+    state.books.forEach(b => b.pages = 0);
+  }
+  save();
+  updateUI();
+  renderBooks();
+  toast('Parabéns! Você zarpou para um novo oceano com Prestígio ' + state.prestige + '!');
+}
+
+function renderConstancyCalendar(){
+  let calendarEl = document.getElementById('constancy-calendar');
+  let monthLabel = document.getElementById('calendar-month-label');
+  if(!calendarEl) return;
+
+  let now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth();
+  
+  let monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  if(monthLabel) monthLabel.textContent = monthNames[month];
+
+  let daysInMonth = new Date(year, month + 1, 0).getDate();
+  let weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+  if(!state.activeDays) state.activeDays = [];
+
+  let html = weekDays.map(d => `<div style="font-size:10px;color:#deb887;font-weight:700;padding-bottom:4px">${d}</div>`).join('');
+
+  let firstDayIndex = new Date(year, month, 1).getDay();
+  for(let i = 0; i < firstDayIndex; i++){
+    html += `<div></div>`;
+  }
+
+  for(let day = 1; day <= daysInMonth; day++){
+    let dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    let isCompleted = state.activeDays.includes(dayStr);
+    let isToday = day === now.getDate();
+
+    let bgStyle = isCompleted 
+      ? 'background:var(--green-accent);color:#060e1e;font-weight:800;box-shadow:0 0 8px rgba(34,197,94,0.7)' 
+      : isToday 
+        ? 'border:1.5px solid var(--blue-primary);color:var(--text-main);font-weight:700' 
+        : 'background:rgba(255,255,255,0.06);color:var(--text-main)';
+
+    html += `
+      <div style="width:32px;height:32px;margin:3px auto;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:12px;${bgStyle}" title="${dayStr}">
+        ${day}
+      </div>
+    `;
+  }
+
+  calendarEl.innerHTML = html;
+}
+
+function updateUI(){
+  document.getElementById('hi-pages').textContent = state.pages;
+  
+  let pct = Math.min(100, Math.round((state.pages / state.goal) * 100));
+  document.getElementById('hi-bpct').textContent = pct + '%';
+  
+  let donutPath = document.getElementById('donut-path');
+  let donutPct = document.getElementById('donut-pct');
+  let donutDesc = document.getElementById('donut-desc');
+  
+  if(donutPath) donutPath.setAttribute('stroke-dasharray', `${pct}, 100`);
+  if(donutPct) donutPct.textContent = pct + '%';
+  if(donutDesc) donutDesc.textContent = `${state.pages} de ${state.goal} páginas da meta alcançadas.`;
+
+  let qStatus = document.getElementById('quest-status');
+  if(state.pages >= 15){
+    if(qStatus){ qStatus.textContent = 'Concluído 🌬️'; qStatus.style.color = 'var(--green-accent)'; }
+  } else {
+    if(qStatus){ qStatus.textContent = 'Pendente'; qStatus.style.color = 'var(--text-mut)'; }
+  }
+
+  let totalPages = state.pages;
+  let piecesEarned = Math.min(12, Math.floor(totalPages / 20)); 
+  let shipPct = Math.round((piecesEarned / 12) * 100);
+
+  let badge = document.getElementById('ship-level-badge');
+  let icon3d = document.getElementById('ship-3d-icon');
+  let title = document.getElementById('ship-level-title');
+  let desc = document.getElementById('ship-level-desc');
+  let piecesTxt = document.getElementById('ship-pieces-txt');
+  let xpPct = document.getElementById('ship-xp-pct');
+  let oceanTitle = document.getElementById('ship-ocean-title');
+  let prestigeContainer = document.getElementById('prestige-container');
+  let prestigeStars = document.getElementById('prestige-stars');
+  
+  let rankTag = document.getElementById('hi-rank-tag');
+  let badgeIcon = document.getElementById('hi-badge-icon');
+  let nameEl = document.getElementById('hi-name');
+  let userName = state.name || 'Fagner';
+
+  let homeShipArt = document.getElementById('home-ship-art');
+  let homeShipSubtitle = document.getElementById('home-ship-subtitle');
+  let homeShipTitleTop = document.getElementById('home-ship-title-top');
+
+  let oceans = ['OCEANO DOS CLÁSSICOS', 'MAR DA FILOSOFIA', 'ARQUIPÉLAGO DOS CONCURSOS', 'FROTA IMPERIAL LENDÁRIA'];
+  let currentOcean = oceans[Math.min(state.prestige || 0, oceans.length - 1)];
+  if(oceanTitle) oceanTitle.textContent = currentOcean;
+  if(prestigeStars) prestigeStars.textContent = `⭐️ Estrelas de Almirante: ${state.prestige || 0}`;
+
+  if(piecesEarned >= 12){
+    if(badge) badge.textContent = 'Nível Máximo';
+    if(icon3d) icon3d.textContent = '🏴‍☠️✨⛵';
+    if(title) title.textContent = 'Nau Capitânia Lendária (Ouro e Carvalho)';
+    if(desc) desc.textContent = 'Sua frota domina os mares do conhecimento!';
+    if(homeShipArt) homeShipArt.textContent = '🏴‍☠️✨⛵';
+    if(homeShipTitleTop) homeShipTitleTop.textContent = 'Nau Capitânia Lendária';
+    if(homeShipSubtitle) homeShipSubtitle.textContent = 'Ouro e Carvalho Maciço • Nível Máximo';
+    if(rankTag) rankTag.textContent = 'ALMIRANTE DA FROTA';
+    if(badgeIcon) badgeIcon.textContent = '🎖️🎖️🎖️⭐';
+    if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px;color:#f59e0b">⚓ Mestre</span>`;
+    if(prestigeContainer) prestigeContainer.style.display = 'block';
+  } else {
+    if(prestigeContainer) prestigeContainer.style.display = 'none';
+    if(piecesEarned >= 9){
+      if(badge) badge.textContent = 'Nível 4';
+      if(icon3d) icon3d.textContent = '🚢🟫⚓';
+      if(title) title.textContent = 'Caravela de Exploração Avançada (Carvalho Escuro)';
+      if(desc) desc.textContent = 'Casco reforçado com carvalho escuro e canhões prontos.';
+      if(homeShipArt) homeShipArt.textContent = '🚢🟫⚓';
+      if(homeShipTitleTop) homeShipTitleTop.textContent = 'Caravela Avançada';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Carvalho escuro e canhões • Nível 4';
+      if(rankTag) rankTag.textContent = 'CAPITÃO DO MAR';
+      if(badgeIcon) badgeIcon.textContent = '🎖️🎖️';
+      if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px">⚓</span>`;
+    } else if(piecesEarned >= 6){
+      if(badge) badge.textContent = 'Nível 3';
+      if(icon3d) icon3d.textContent = '⛵🪵🧭';
+      if(title) title.textContent = 'Caravela de Exploração (Carvalho)';
+      if(desc) desc.textContent = 'Velas duplas e textura de madeira tratada.';
+      if(homeShipArt) homeShipArt.textContent = '⛵🪵🧭';
+      if(homeShipTitleTop) homeShipTitleTop.textContent = 'Caravela de Exploração';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Madeira tratada e velas duplas • Nível 3';
+      if(rankTag) rankTag.textContent = 'TENENTE DO MAR';
+      if(badgeIcon) badgeIcon.textContent = '🎖️';
+      if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px">⚓</span>`;
+    } else if(piecesEarned >= 3){
+      if(badge) badge.textContent = 'Nível 2';
+      if(icon3d) icon3d.textContent = '🛶🪵';
+      if(title) title.textContent = 'Barco de Pesca / Tronco Envernizado';
+      if(desc) desc.textContent = 'O mastro de madeira rústica começa a guiar sua rotina.';
+      if(homeShipArt) homeShipArt.textContent = '🛶🪵';
+      if(homeShipTitleTop) homeShipTitleTop.textContent = 'Barco de Pesca';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Troncos envernizados • Nível 2';
+      if(rankTag) rankTag.textContent = 'MARINHEIRO';
+      if(badgeIcon) badgeIcon.textContent = '🏅';
+      if(nameEl) nameEl.innerHTML = `${userName}`;
+    } else {
+      if(badge) badge.textContent = 'Nível 1';
+      if(icon3d) icon3d.textContent = '⛵🪵';
+      if(title) title.textContent = 'Jangada de Toras (Madeira Bruta)';
+      if(desc) desc.textContent = 'O ponto de partida do navegador em toras de madeira.';
+      if(homeShipArt) homeShipArt.textContent = '⛵🪵';
+      if(homeShipTitleTop) homeShipTitleTop.textContent = 'Embarcação de Madeira';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Estrutura robusta de partida • Nível 1';
+      if(rankTag) rankTag.textContent = 'RECRUTA';
+      if(badgeIcon) badgeIcon.textContent = '🎖️';
+      if(nameEl) nameEl.innerHTML = `${userName}`;
+    }
+  }
+
+  if(piecesTxt) piecesTxt.textContent = `Peças conquistadas: ${piecesEarned} / 12`;
+  if(xpPct) xpPct.textContent = shipPct + '%';
+
+  let diaryList = document.getElementById('pieces-diary-list');
+  if(diaryList){
+    let pieceNames = [
+      "Tronco base de madeira", "Corda de amarra", "Remo rústico",
+      "Mastro central de madeira", "Vela de tecido branco", "Leme de direção",
+      "Segunda vela e cordame", "Cesto do vigia (Gávea)", "Casco reforçado",
+      "Estandarte principal", "Canhões laterais", "Leme de ouro mestre"
+    ];
+    diaryList.innerHTML = pieceNames.map((pName, idx) => {
+      let unlocked = piecesEarned > idx;
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:6px;border:1px solid ${unlocked ? 'rgba(56,189,248,0.4)' : 'var(--border-color)'}">
+          <span style="font-size:13px;color:${unlocked ? 'var(--text-main)' : 'var(--text-mut)'}">${idx+1}. ${pName} (${(idx)*20}–${(idx+1)*20} pág)</span>
+          <span style="font-size:12px">${unlocked ? '✅ Conquistada' : '🔒 Bloqueada'}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  let stkEl = document.querySelector('.stk');
+  if(stkEl) stkEl.textContent = state.streak;
+  let mailEl = document.getElementById('pg-mail');
+  if(mailEl) mailEl.textContent = state.email;
+  let totalInput = document.getElementById('pg-edit-total');
+  if(totalInput) totalInput.value = state.pages;
+  
+  renderConstancyCalendar();
+  updateActiveBookDisplay();
+  renderFriends();
+}
+
+function initApp(){
+  updateUI();
+  renderBooks();
+  renderFriends();
+  if(state.logged){
+    go('s-app');
+  }
+}
+
+window.onload = function(){
+  if(state.logged){
+    go('s-app');
+    initApp();
+  } else {
+    go('s-login');
+  }
+};
