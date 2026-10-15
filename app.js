@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v14';
+var KEY = 'cbbook_v12';
 var state = load() || fresh();
 
 function fresh(){
@@ -50,12 +50,11 @@ function tab(name){
 function login(){
   let m = document.getElementById('lg-mail').value;
   let p = document.getElementById('lg-pass').value;
-  
+  if(!m || !p){ toast('Preencha e-mail e senha'); return; }
   state.logged = true;
-  state.email = m || 'fagner@email.com';
-  state.name = m ? m.split('@')[0] : 'Fagner';
+  state.email = m;
+  state.name = m.split('@')[0];
   state.name = state.name.charAt(0).toUpperCase() + state.name.slice(1);
-  
   save();
   initApp();
   go('s-app');
