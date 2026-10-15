@@ -1,4 +1,4 @@
-var KEY = 'cbbook_v10';
+var KEY = 'cbbook_v11';
 var state = load() || fresh();
 
 function fresh(){
@@ -489,7 +489,7 @@ function updateUI(){
   let nameEl = document.getElementById('hi-name');
   let userName = state.name || 'Fagner';
 
-  let homeShipArt = document.getElementById('home-ship-art');
+  let homeShipWatermark = document.getElementById('home-ship-watermark');
   let homeShipSubtitle = document.getElementById('home-ship-subtitle');
 
   let oceans = ['OCEANO DOS CLÁSSICOS', 'MAR DA FILOSOFIA', 'ARQUIPÉLAGO DOS CONCURSOS', 'FROTA IMPERIAL LENDÁRIA'];
@@ -502,8 +502,8 @@ function updateUI(){
     if(icon3d) icon3d.textContent = '🏴‍☠️✨⛵';
     if(title) title.textContent = 'Nau Capitânia Lendária (Ouro e Carvalho)';
     if(desc) desc.textContent = 'Sua frota domina os mares do conhecimento!';
-    if(homeShipArt) homeShipArt.textContent = '🏴‍☠️✨⛵';
-    if(homeShipSubtitle) homeShipSubtitle.textContent = 'Nau Capitânia Lendária • Nível Máximo';
+    if(homeShipWatermark) homeShipWatermark.textContent = '🏴‍☠️✨⛵';
+    if(homeShipSubtitle) homeShipSubtitle.textContent = '📅 Diário de Bordo • Nau Capitânia Lendária';
     if(rankTag) rankTag.textContent = 'ALMIRANTE DA FROTA';
     if(badgeIcon) badgeIcon.textContent = '🎖️🎖️🎖️⭐';
     if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px;color:#f59e0b">⚓ Mestre</span>`;
@@ -515,8 +515,8 @@ function updateUI(){
       if(icon3d) icon3d.textContent = '🚢🟫⚓';
       if(title) title.textContent = 'Caravela de Exploração Avançada (Carvalho Escuro)';
       if(desc) desc.textContent = 'Casco reforçado com carvalho escuro e canhões prontos.';
-      if(homeShipArt) homeShipArt.textContent = '🚢🟫⚓';
-      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Caravela Avançada • Nível 4';
+      if(homeShipWatermark) homeShipWatermark.textContent = '🚢🟫⚓';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = '📅 Diário de Bordo • Caravela Avançada';
       if(rankTag) rankTag.textContent = 'CAPITÃO DO MAR';
       if(badgeIcon) badgeIcon.textContent = '🎖️🎖️';
       if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px">⚓</span>`;
@@ -525,8 +525,8 @@ function updateUI(){
       if(icon3d) icon3d.textContent = '⛵🪵🧭';
       if(title) title.textContent = 'Caravela de Exploração (Carvalho)';
       if(desc) desc.textContent = 'Velas duplas e textura de madeira tratada.';
-      if(homeShipArt) homeShipArt.textContent = '⛵🪵🧭';
-      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Caravela de Exploração • Nível 3';
+      if(homeShipWatermark) homeShipWatermark.textContent = '⛵🪵🧭';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = '📅 Diário de Bordo • Caravela de Exploração';
       if(rankTag) rankTag.textContent = 'TENENTE DO MAR';
       if(badgeIcon) badgeIcon.textContent = '🎖️';
       if(nameEl) nameEl.innerHTML = `${userName} <span style="font-size:15px">⚓</span>`;
@@ -535,8 +535,8 @@ function updateUI(){
       if(icon3d) icon3d.textContent = '🛶🪵';
       if(title) title.textContent = 'Barco de Pesca / Tronco Envernizado';
       if(desc) desc.textContent = 'O mastro de madeira rústica começa a guiar sua rotina.';
-      if(homeShipArt) homeShipArt.textContent = '🛶🪵';
-      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Barco de Pesca • Nível 2';
+      if(homeShipWatermark) homeShipWatermark.textContent = '🛶🪵';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = '📅 Diário de Bordo • Barco de Pesca';
       if(rankTag) rankTag.textContent = 'MARINHEIRO';
       if(badgeIcon) badgeIcon.textContent = '🏅';
       if(nameEl) nameEl.innerHTML = `${userName}`;
@@ -545,8 +545,8 @@ function updateUI(){
       if(icon3d) icon3d.textContent = '🪵🛶';
       if(title) title.textContent = 'Jangada de Toras (Madeira Bruta)';
       if(desc) desc.textContent = 'O ponto de partida do navegador em toras de madeira.';
-      if(homeShipArt) homeShipArt.textContent = '🪵🛶';
-      if(homeShipSubtitle) homeShipSubtitle.textContent = 'Jangada de Toras • Nível 1';
+      if(homeShipWatermark) homeShipWatermark.textContent = '🪵🛶';
+      if(homeShipSubtitle) homeShipSubtitle.textContent = '📅 Diário de Bordo • Jangada de Toras';
       if(rankTag) rankTag.textContent = 'RECRUTA';
       if(badgeIcon) badgeIcon.textContent = '🎖️';
       if(nameEl) nameEl.innerHTML = `${userName}`;
