@@ -115,95 +115,97 @@
 
 <!-- INÍCIO -->
 <div class="v act" id="v-hoje" style="padding-bottom:100px">
-<!-- Caravela Estruturada em Textura de Madeira no Topo -->
-<div id="home-ship-container" style="position:relative;width:100%;background:linear-gradient(180deg, rgba(139,69,19,0.25) 0%, rgba(6,14,30,0.95) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:1px solid rgba(210,105,30,0.3);padding:14px 16px 10px;overflow:hidden;">
-  <div id="home-ship-art" style="font-size:48px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.7));transition:transform 0.4s ease;">🪵🛶</div>
-  <div class="mut" id="home-ship-subtitle" style="font-size:11px;margin-top:2px;letter-spacing:0.05em;color:#deb887">Jangada de Toras • Nível 1</div>
+  
+  <!-- 1. Embarcação no Topo -->
+  <div id="home-ship-container" style="position:relative;width:100%;background:linear-gradient(180deg, rgba(139,69,19,0.3) 0%, rgba(6,14,30,0.95) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:1px solid rgba(210,105,30,0.3);padding:16px 16px 12px;overflow:hidden;">
+    <div id="home-ship-art" style="font-size:52px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.7));transition:transform 0.4s ease;">🪵🛶</div>
+    <div class="mut" id="home-ship-subtitle" style="font-size:12px;margin-top:4px;letter-spacing:0.05em;color:#deb887;font-weight:700">Jangada de Toras • Nível 1</div>
+  </div>
 
-  <!-- Calendário de Constância (Bolinhas de Dias Concluídos) -->
-  <div style="width:100%;margin-top:10px;padding-top:8px;border-top:1px dashed rgba(210,105,30,0.3)">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <span class="mut" style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em">Diário de Bordo (Dias do Mês)</span>
-      <span class="mut" id="calendar-month-label" style="font-size:10px;color:#deb887">Outubro</span>
+  <!-- 2. Calendário de Constância em Bolinhas (Logo abaixo da embarcação) -->
+  <div class="card" style="margin: 12px 16px; background: rgba(13,27,51,0.85); border: 1px solid rgba(210,105,30,0.3);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="mut" style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#deb887">📅 Diário de Bordo (Dias do Mês)</span>
+      <span class="mut" id="calendar-month-label" style="font-size:11px;color:#deb887;font-weight:700">Outubro</span>
     </div>
-    <div id="constancy-calendar" style="display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;text-align:center;">
+    <div id="constancy-calendar" style="display:grid;grid-template-columns:repeat(7, 1fr);gap:6px;text-align:center;">
       <!-- Preenchido dinamicamente via JS -->
     </div>
   </div>
-</div>
 
-<div style="padding:16px 20px 8px;display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2">
-<div>
-  <div style="display:flex;align-items:center;gap:6px">
-    <span class="tag" id="hi-rank-tag">RECRUTA 🎖️</span>
-    <span id="hi-badge-icon" style="font-size:14px">🪵</span>
+  <!-- 3. Informações do Perfil e Botão Registrar -->
+  <div style="padding:4px 20px 8px;display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2">
+    <div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="tag" id="hi-rank-tag">RECRUTA 🎖️</span>
+        <span id="hi-badge-icon" style="font-size:14px">🪵</span>
+      </div>
+      <div class="wm" id="hi-name" style="font-size:22px;margin-top:2px">Fagner</div>
+      <div class="mut" style="font-size:12px">Sua jornada de estudos em um só lugar.</div>
+    </div>
+    <button class="btn-launch" onclick="openSheet()"><i class="ti ti-plus"></i> Registrar</button>
   </div>
-  <div class="wm" id="hi-name" style="font-size:22px;margin-top:2px">Fagner</div>
-  <div class="mut" style="font-size:12px">Sua jornada de estudos em um só lugar.</div>
-</div>
-<button class="btn-launch" onclick="openSheet()"><i class="ti ti-plus"></i> Registrar</button>
-</div>
 
-<!-- Painel de Progresso -->
-<div class="card" style="margin-top:4px">
-<div style="display:flex;justify-content:space-between;align-items:center">
-<span class="mut" style="font-size:12px">Painel de Progresso (7 dias)</span>
-<span class="badge" style="background:rgba(34,197,94,0.15);color:var(--green-accent);border:none">• ativo</span>
-</div>
-<div style="display:flex;align-items:baseline;gap:8px;margin-top:6px">
-<span class="sf" style="font-size:38px" id="hi-pages">0</span>
-<span class="mut" style="font-size:16px">/ 30 pag</span>
-</div>
+  <!-- Painel de Progresso -->
+  <div class="card" style="margin-top:4px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span class="mut" style="font-size:12px">Painel de Progresso (7 dias)</span>
+      <span class="badge" style="background:rgba(34,197,94,0.15);color:var(--green-accent);border:none">• ativo</span>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:8px;margin-top:6px">
+      <span class="sf" style="font-size:38px" id="hi-pages">0</span>
+      <span class="mut" style="font-size:16px">/ 30 pag</span>
+    </div>
 
-<div style="display:flex;gap:16px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border-color)">
-<div style="flex:1">
-<div class="mut" style="font-size:11px">Sequência</div>
-<div class="sf" style="font-size:15px;color:var(--blue-primary);margin-top:2px"><span class="stk">0</span> dias seguidos</div>
-</div>
-<div style="flex:1">
-<div class="mut" style="font-size:11px">Meta Diária</div>
-<div class="sf" style="font-size:15px;color:var(--green-accent);margin-top:2px" id="hi-bpct">0%</div>
-</div>
-</div>
-</div>
+    <div style="display:flex;gap:16px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border-color)">
+      <div style="flex:1">
+        <div class="mut" style="font-size:11px">Sequência</div>
+        <div class="sf" style="font-size:15px;color:var(--blue-primary);margin-top:2px"><span class="stk">0</span> dias seguidos</div>
+      </div>
+      <div style="flex:1">
+        <div class="mut" style="font-size:11px">Meta Diária</div>
+        <div class="sf" style="font-size:15px;color:var(--green-accent);margin-top:2px" id="hi-bpct">0%</div>
+      </div>
+    </div>
+  </div>
 
-<!-- DESAFIO DIÁRIO (VENTO NOS CASTELOS) -->
-<div class="card" style="border-color:rgba(56,189,248,0.3)">
-<div style="display:flex;justify-content:space-between;align-items:center">
-<span class="mut" style="font-size:11px">🌬️ VENTO NOS CASTELOS (MISSÃO DIÁRIA)</span>
-<span class="badge" id="quest-status">Pendente</span>
-</div>
-<div class="t" style="margin-top:4px;font-size:15px" id="quest-title">Ler pelo menos 15 páginas hoje</div>
-<div class="mut" style="margin-top:4px;font-size:12px">Complete o desafio diário para garantir vento a favor na sua frota!</div>
-</div>
+  <!-- DESAFIO DIÁRIO (VENTO NOS CASTELOS) -->
+  <div class="card" style="border-color:rgba(56,189,248,0.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span class="mut" style="font-size:11px">🌬️ VENTO NOS CASTELOS (MISSÃO DIÁRIA)</span>
+      <span class="badge" id="quest-status">Pendente</span>
+    </div>
+    <div class="t" style="margin-top:4px;font-size:15px" id="quest-title">Ler pelo menos 15 páginas hoje</div>
+    <div class="mut" style="margin-top:4px;font-size:12px">Complete o desafio diário para garantir vento a favor na sua frota!</div>
+  </div>
 
-<!-- GRÁFICO CIRCULAR DE DESEMPENHO -->
-<div class="card" style="display:flex;align-items:center;gap:20px;">
-<div style="position:relative;width:80px;height:80px;flex-shrink:0;">
-<svg width="80" height="80" viewBox="0 0 36 36" style="transform:rotate(-90deg)">
-<path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--border-color)" stroke-width="3.5" />
-<path id="donut-path" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--blue-primary)" stroke-width="3.5" stroke-dasharray="0, 100" stroke-linecap="round" />
-</svg>
-<div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
-<span class="sf" id="donut-pct" style="font-size:15px">0%</span>
-</div>
-</div>
-<div style="flex:1;min-width:0">
-<div class="mut" style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em">DESEMPENHO DA META</div>
-<div class="t" style="margin-top:2px;font-size:15px">Constância de Leitura</div>
-<div class="mut" style="margin-top:4px;font-size:12px" id="donut-desc">0 de 30 páginas da meta alcançadas.</div>
-</div>
-</div>
+  <!-- GRÁFICO CIRCULAR DE DESEMPENHO -->
+  <div class="card" style="display:flex;align-items:center;gap:20px;">
+    <div style="position:relative;width:80px;height:80px;flex-shrink:0;">
+      <svg width="80" height="80" viewBox="0 0 36 36" style="transform:rotate(-90deg)">
+        <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--border-color)" stroke-width="3.5" />
+        <path id="donut-path" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--blue-primary)" stroke-width="3.5" stroke-dasharray="0, 100" stroke-linecap="round" />
+      </svg>
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+        <span class="sf" id="donut-pct" style="font-size:15px">0%</span>
+      </div>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div class="mut" style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em">DESEMPENHO DA META</div>
+      <div class="t" style="margin-top:2px;font-size:15px">Constância de Leitura</div>
+      <div class="mut" style="margin-top:4px;font-size:12px" id="donut-desc">0 de 30 páginas da meta alcançadas.</div>
+    </div>
+  </div>
 
-<div class="card" style="display:flex;gap:14px;align-items:center">
-<div class="bk"><span id="ac-cover">D</span></div>
-<div style="flex:1;min-width:0">
-<div class="mut" style="font-size:11px">LIVRO EM ANDAMENTO</div>
-<div class="t" id="hi-book" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Nenhum livro</div>
-<div class="mut" id="hi-author" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Adicione na aba Leitura</div>
-</div>
-<button class="ib" onclick="tab('leitura')"><i class="ti ti-chevron-right"></i></button>
-</div>
+  <div class="card" style="display:flex;gap:14px;align-items:center">
+    <div class="bk"><span id="ac-cover">D</span></div>
+    <div style="flex:1;min-width:0">
+      <div class="mut" style="font-size:11px">LIVRO EM ANDAMENTO</div>
+      <div class="t" id="hi-book" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Nenhum livro</div>
+      <div class="mut" id="hi-author" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Adicione na aba Leitura</div>
+    </div>
+    <button class="ib" onclick="tab('leitura')"><i class="ti ti-chevron-right"></i></button>
+  </div>
 
 </div>
 
