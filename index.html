@@ -116,24 +116,24 @@
 <!-- INÍCIO -->
 <div class="v act" id="v-hoje" style="padding-bottom:100px">
   
-  <!-- 1. Embarcação no Topo -->
-  <div id="home-ship-container" style="position:relative;width:100%;background:linear-gradient(180deg, rgba(139,69,19,0.3) 0%, rgba(6,14,30,0.95) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:1px solid rgba(210,105,30,0.3);padding:16px 16px 12px;overflow:hidden;">
-    <div id="home-ship-art" style="font-size:52px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.7));transition:transform 0.4s ease;">🪵🛶</div>
-    <div class="mut" id="home-ship-subtitle" style="font-size:12px;margin-top:4px;letter-spacing:0.05em;color:#deb887;font-weight:700">Jangada de Toras • Nível 1</div>
+  <!-- Calendário com a Embarcação Estruturada de Fundo (Watermark / Tela de Descanso) -->
+  <div class="card" style="margin: 12px 16px; position: relative; overflow: hidden; background: linear-gradient(135deg, rgba(13,27,51,0.92) 0%, rgba(13,27,51,0.98) 100%); border: 1px solid rgba(210,105,30,0.4);">
+    
+    <!-- Arte da Embarcação ao Fundo com Baixa Opacidade -->
+    <div id="home-ship-watermark" style="position: absolute; right: 10px; bottom: 5px; font-size: 85px; opacity: 0.15; pointer-events: none; z-index: 1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.8));">🪵🛶</div>
+
+    <div style="position: relative; z-index: 2;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span class="mut" style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#deb887" id="home-ship-subtitle">📅 Diário de Bordo • Nível 1</span>
+        <span class="mut" id="calendar-month-label" style="font-size:11px;color:#deb887;font-weight:700">Outubro</span>
+      </div>
+      <div id="constancy-calendar" style="display:grid;grid-template-columns:repeat(7, 1fr);gap:6px;text-align:center;">
+        <!-- Preenchido dinamicamente via JS -->
+      </div>
+    </div>
   </div>
 
-  <!-- 2. Calendário de Constância em Bolinhas (Logo abaixo da embarcação) -->
-  <div class="card" style="margin: 12px 16px; background: rgba(13,27,51,0.85); border: 1px solid rgba(210,105,30,0.3);">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <span class="mut" style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#deb887">📅 Diário de Bordo (Dias do Mês)</span>
-      <span class="mut" id="calendar-month-label" style="font-size:11px;color:#deb887;font-weight:700">Outubro</span>
-    </div>
-    <div id="constancy-calendar" style="display:grid;grid-template-columns:repeat(7, 1fr);gap:6px;text-align:center;">
-      <!-- Preenchido dinamicamente via JS -->
-    </div>
-  </div>
-
-  <!-- 3. Informações do Perfil e Botão Registrar -->
+  <!-- Informações do Perfil e Botão Registrar -->
   <div style="padding:4px 20px 8px;display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2">
     <div>
       <div style="display:flex;align-items:center;gap:6px">
