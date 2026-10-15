@@ -1,3 +1,20 @@
+/* Aviso de erro na tela (ajuda a achar problemas no celular). Toque para fechar. */
+function cbShowError(msg){
+  try{
+    var b = document.getElementById('cb-err');
+    if(!b){
+      b = document.createElement('div');
+      b.id = 'cb-err';
+      b.style.cssText = 'position:fixed;left:8px;right:8px;top:8px;z-index:99999;background:#7f1d1d;color:#fff;font:12px/1.4 monospace;padding:10px;border-radius:8px;word-break:break-word';
+      b.onclick = function(){ b.remove(); };
+      (document.body || document.documentElement).appendChild(b);
+    }
+    b.textContent = 'Erro: ' + msg;
+  }catch(e){}
+}
+window.addEventListener('error', function(e){ cbShowError((e.message || 'erro') + ' (linha ' + e.lineno + ')'); });
+window.addEventListener('unhandledrejection', function(e){ cbShowError(String(e.reason)); });
+
 var KEY = 'cbbook_v19';
 var state = load() || fresh();
 
@@ -613,6 +630,10 @@ function dayInfo(key, idx){
 function renderWeeklyTracker(){
   var el = document.getElementById('weekly-streak-tracker');
   if(!el) return;
+  try{ renderWeeklyTrackerInner(el); }catch(err){ cbShowError('diário: ' + err.message); }
+}
+
+function renderWeeklyTrackerInner(el){
   var now = new Date();
   var dow = now.getDay();
   var cols = '';
@@ -669,17 +690,22 @@ function caravelSVG(pieces, prestige, pre){
     return '<path d="' + d + ' V220 H0 Z" fill="' + fill + '"/>';
   }
 
-  var s = '<svg viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Embarcação com ' + pieces + ' de 12 peças" style="width:100%;max-width:300px;height:auto;display:block;margin:0 auto">';
+  var vbTop = (prestige > 0 || pieces >= 10) ? 0 : (pieces >= 9 ? 20 : (pieces >= 4 ? 40 : 100));
+  var s = '<svg viewBox="0 ' + vbTop + ' 300 ' + (220 - vbTop) + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Embarcação com ' + pieces + ' de 12 peças" style="width:100%;max-width:' + (pre === 'h' ? 270 : 300) + 'px;height:auto;display:block;margin:0 auto">';
   s += '<defs>' +
     '<linearGradient id="' + pre + 'hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + woodLight + '"/><stop offset="1" stop-color="' + wood + '"/></linearGradient>' +
     '<radialGradient id="' + pre + 'glow"><stop offset="0" stop-color="#f5b82e" stop-opacity=".45"/><stop offset="1" stop-color="#f5b82e" stop-opacity="0"/></radialGradient>' +
+    '<linearGradient id="' + pre + 'w1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e4078" stop-opacity=".6"/><stop offset="1" stop-color="#1e4078" stop-opacity="0"/></linearGradient>' +
+    '<linearGradient id="' + pre + 'w2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e2856" stop-opacity=".92"/><stop offset=".5" stop-color="#0e2856" stop-opacity=".5"/><stop offset="1" stop-color="#0e2856" stop-opacity="0"/></linearGradient>' +
+    '<linearGradient id="' + pre + 'wg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".15" stop-color="#fff"/><stop offset=".85" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>' +
+    '<mask id="' + pre + 'wm" maskUnits="userSpaceOnUse" x="0" y="0" width="300" height="220"><rect width="300" height="220" fill="url(#' + pre + 'wg)"/></mask>' +
     '<style>.cv-bob{animation:cvb 4.5s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 90%}@keyframes cvb{0%,100%{transform:translateY(0) rotate(-.8deg)}50%{transform:translateY(-3px) rotate(.8deg)}}@media(prefers-reduced-motion:reduce){.cv-bob{animation:none}}</style>' +
     '</defs>';
 
   if(gold) s += '<circle cx="150" cy="105" r="115" fill="url(#' + pre + 'glow)"/>';
   for(var k = 0; k < Math.min(prestige || 0, 5); k++) s += '<text x="' + (16 + k * 18) + '" y="24" font-size="15" fill="' + goldC + '">★</text>';
 
-  s += wave(174, 7, 36, 'rgba(30,64,120,.55)');
+  s += '<g mask="url(#' + pre + 'wm)">' + wave(174, 7, 36, 'url(#' + pre + 'w1)') + '</g>';
   s += '<g class="cv-bob">';
 
   /* --- Casco --- */
@@ -760,7 +786,7 @@ function caravelSVG(pieces, prestige, pre){
   });
 
   s += '</g>';
-  s += wave(180, 6, 30, 'rgba(14,40,86,.88)');
+  s += '<g mask="url(#' + pre + 'wm)">' + wave(180, 6, 30, 'url(#' + pre + 'w2)') + '</g>';
   s += '</svg>';
   return s;
 }
@@ -777,9 +803,10 @@ updateUI = function(){
   state.streak = calcStreak();
   _baseUpdateUI();
 
+  try{
   var pieces = Math.min(12, Math.floor((state.pages || 0) / 20));
   var home = document.getElementById('home-ship-art');
-  if(home){ home.style.fontSize = '0'; home.innerHTML = caravelSVG(pieces, state.prestige, 'h'); }
+  if(home){ home.style.fontSize = '0'; if(home.parentElement){ var hp = home.parentElement.style; hp.flexShrink = '0'; hp.overflow = 'visible'; hp.minHeight = 'max-content'; hp.height = 'auto'; } home.innerHTML = caravelSVG(pieces, state.prestige, 'h'); }
   var dev = document.getElementById('ship-3d-icon');
   if(dev){ dev.style.fontSize = '0'; dev.innerHTML = caravelSVG(pieces, state.prestige, 'd'); }
 
@@ -789,4 +816,5 @@ updateUI = function(){
     if(today >= DAILY_GOAL){ q.textContent = 'Concluído 🔥'; q.style.color = 'var(--green-accent)'; }
     else { q.textContent = today + '/' + DAILY_GOAL + ' pág'; q.style.color = 'var(--text-mut)'; }
   }
+  }catch(err){ cbShowError('caravela: ' + err.message); }
 };
