@@ -15,6 +15,31 @@ function cbShowError(msg){
 window.addEventListener('error', function(e){ cbShowError((e.message || 'erro') + ' (linha ' + e.lineno + ')'); });
 window.addEventListener('unhandledrejection', function(e){ cbShowError(String(e.reason)); });
 
+/* ================= AJUSTE DE TELA CHEIA (celular) =================
+   Para desfazer, apague este bloco inteiro (até o fim do comentário "FIM AJUSTE"). */
+(function(){
+  var st = document.createElement('style');
+  st.id = 'cb-fullscreen-css';
+  st.textContent = [
+    '@media (max-width:700px){',
+    '  html,body{margin:0;height:100%;overflow:hidden;background:#060e1e}',
+    '  #app,.ph{width:100% !important;max-width:none !important;height:100vh !important;height:100dvh !important;min-height:0 !important;margin:0 !important;border-radius:0 !important;border:none !important;box-shadow:none !important}',
+    '  .sc{height:100% !important}',
+    '  .views{height:100% !important;overflow-y:auto !important;overflow-x:hidden !important;-webkit-overflow-scrolling:touch}',
+    '  .v{height:auto !important;min-height:100%}',
+    '  #v-hoje > div:first-child{flex-shrink:0 !important;overflow:visible !important;min-height:max-content !important;height:auto !important}',
+    '  .views::-webkit-scrollbar{width:5px}',
+    '  .views::-webkit-scrollbar-thumb{background:rgba(222,184,135,.55);border-radius:4px}',
+    '  .nav{position:fixed !important;left:6px !important;right:6px !important;bottom:calc(6px + env(safe-area-inset-bottom)) !important;width:auto !important;max-width:none !important;height:auto !important;margin:0 auto !important;padding:6px 4px calc(6px + env(safe-area-inset-bottom) * 0) !important;box-sizing:border-box;align-items:stretch;justify-content:space-between;gap:2px;z-index:50}',
+    '  .nav button{flex:1 1 0 !important;min-width:0 !important;height:auto !important;padding:8px 1px 7px !important;display:flex !important;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.1 !important;white-space:nowrap;overflow:visible !important;font-size:clamp(8px,2.45vw,11px) !important;letter-spacing:-.2px}',
+    '  .nav button i{font-size:20px}',
+    '  .toast{top:calc(10px + env(safe-area-inset-top))}',
+    '}'
+  ].join('\n');
+  document.head.appendChild(st);
+})();
+/* FIM AJUSTE */
+
 var KEY = 'cbbook_v19';
 var state = load() || fresh();
 
@@ -690,8 +715,8 @@ function caravelSVG(pieces, prestige, pre){
     return '<path d="' + d + ' V220 H0 Z" fill="' + fill + '"/>';
   }
 
-  var vbTop = (prestige > 0 || pieces >= 10) ? 0 : (pieces >= 9 ? 20 : (pieces >= 4 ? 40 : 100));
-  var s = '<svg viewBox="0 ' + vbTop + ' 300 ' + (220 - vbTop) + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Embarcação com ' + pieces + ' de 12 peças" style="width:100%;max-width:' + (pre === 'h' ? 270 : 300) + 'px;height:auto;display:block;margin:0 auto">';
+  var vbTop = 0; // mostra a arte inteira
+  var s = '<svg viewBox="0 ' + vbTop + ' 300 ' + (220 - vbTop) + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Embarcação com ' + pieces + ' de 12 peças" style="width:100%;max-width:' + (pre === 'h' ? 340 : 320) + 'px;height:auto;display:block;margin:0 auto">';
   s += '<defs>' +
     '<linearGradient id="' + pre + 'hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + woodLight + '"/><stop offset="1" stop-color="' + wood + '"/></linearGradient>' +
     '<radialGradient id="' + pre + 'glow"><stop offset="0" stop-color="#f5b82e" stop-opacity=".45"/><stop offset="1" stop-color="#f5b82e" stop-opacity="0"/></radialGradient>' +
