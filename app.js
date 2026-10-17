@@ -1582,9 +1582,101 @@ renderBooks = function(){
       '<div style="display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-color)">' +
         '<button class="ob" style="flex:1;margin:0;padding:6px;font-size:12px" onclick="openSheetForBook(' + b.id + ')"><i class="ti ti-plus"></i> Lançar Páginas</button>' +
         '<button class="ob" style="flex:1;margin:0;padding:6px;font-size:12px" onclick="openNotesModal(' + b.id + ')"><i class="ti ti-notes"></i> Anotações</button>' +
-      '</div>' + row +
+      '</div>' + row + resumoRow(b) +
     '</div>';
   }).join('');
+};
+
+
+/* ================= RESUMO DO LIVRO (vira capítulo no Estúdio) ================= */
+var RESUMO_MIN = 150; // palavras para o resumo contar como entregue
+var pendingResumoBook = null;
+
+function resumoIndex(bookId){
+  var ch = state.ch || [];
+  for(var i = 0; i < ch.length; i++) if(ch[i] && ch[i].kind === 'resumo' && ch[i].bookId === bookId) return i;
+  return -1;
+}
+
+function openResumo(bookId){
+  var book = (state.books || []).find(function(b){ return b.id === bookId; });
+  if(!book) return;
+  var idx = resumoIndex(bookId);
+  openEd(idx);                       // abre o editor (novo, ou o resumo já salvo)
+  if(idx < 0){
+    document.getElementById('edt').value = 'Resumo – ' + book.title;
+    pendingResumoBook = bookId;
+  }
+  document.getElementById('edx').placeholder = 'Explique com suas palavras: a ideia central do livro, os pontos principais, o que você aprendeu e a sua opinião. Mínimo de ' + RESUMO_MIN + ' palavras.';
+  edCount();
+}
+
+var _openEdBase = openEd;
+openEd = function(i){
+  pendingResumoBook = null;
+  var x = document.getElementById('edx');
+  if(x) x.placeholder = 'Escreva o texto aqui...';
+  _openEdBase(i);
+};
+
+var _edSaveBase = edSave;
+edSave = function(){
+  var pend = pendingResumoBook, wasNew = editingChapter < 0, before = (state.ch || []).length;
+  if(pend !== null && !document.getElementById('edx').value.trim()){ toast('Escreva o resumo antes de salvar'); return; }
+  _edSaveBase();
+  if(wasNew && pend !== null && state.ch && state.ch.length > before){
+    var c = state.ch[state.ch.length - 1];
+    c.bookId = pend;
+    c.kind = 'resumo';
+    save();
+  }
+  pendingResumoBook = null;
+  try{ renderBooks(); }catch(e){}
+};
+
+var _closeSheetsResumo = closeSheets;
+closeSheets = function(){ _closeSheetsResumo(); pendingResumoBook = null; };
+
+function resumoRow(b){
+  if((b.pages || 0) < (b.total || 0)) return '';
+  var idx = resumoIndex(b.id);
+  if(idx < 0){
+    return '<button class="ob" style="margin:8px 0 0;padding:10px;font-size:13px;width:100%" onclick="openResumo(' + b.id + ')">✍️ Escrever resumo do livro</button>' +
+           '<div class="mut" style="font-size:11px;margin-top:4px">Conta como páginas escritas. A nota por IA chega com a conta online.</div>';
+  }
+  var w = chapterWords(state.ch[idx]);
+  if(w >= RESUMO_MIN){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(56,189,248,.10);border:1px solid rgba(56,189,248,.4)">' +
+           '<span style="font-size:12px;color:var(--blue-primary);font-weight:700">✍️ Resumo entregue · ' + w + ' palavras</span>' +
+           '<button class="ob" style="margin:0;padding:4px 10px;font-size:11px;width:auto" onclick="openResumo(' + b.id + ')">Editar</button></div>';
+  }
+  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.4)">' +
+         '<span style="font-size:12px;color:#f59e0b;font-weight:700">✍️ Rascunho do resumo · ' + w + '/' + RESUMO_MIN + ' palavras</span>' +
+         '<button class="ob" style="margin:0;padding:4px 10px;font-size:11px;width:auto" onclick="openResumo(' + b.id + ')">Continuar</button></div>';
+}
+
+/* ================= PAINEL PRINCIPAL: sem meta de 30 págs ================= */
+function applyDailyGoal(){
+  var today = (state.daily && state.daily[dayKey(new Date())]) || 0;
+  var pct = Math.min(100, Math.round(today / DAILY_GOAL * 100));
+  var hp = document.getElementById('hi-pages');
+  if(hp && hp.nextElementSibling) hp.nextElementSibling.textContent = 'págs acumuladas';
+  var nodes = document.querySelectorAll('.mut');
+  for(var i = 0; i < nodes.length; i++){
+    var tx = nodes[i].textContent || '';
+    if(tx.indexOf('Painel de Progresso') === 0) nodes[i].textContent = 'Painel de Progresso';
+  }
+  setTxt('hi-bpct', pct + '%');
+  var dp = document.getElementById('donut-path');
+  if(dp) dp.setAttribute('stroke-dasharray', pct + ', 100');
+  setTxt('donut-pct', pct + '%');
+  setTxt('donut-desc', today + ' de ' + DAILY_GOAL + ' páginas lidas hoje.');
+}
+
+var _goalBase = updateUI;
+updateUI = function(){
+  _goalBase();
+  try{ applyDailyGoal(); }catch(err){ cbShowError('painel: ' + err.message); }
 };
 
 if(state && state.logged) { try{ updateUI(); }catch(e){} }
