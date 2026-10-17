@@ -850,7 +850,7 @@ var NAU_AT = 500, GALEAO_AT = 750, VAPOR_AT = 1000, NAUT_READ = 1000, NAUT_WRITE
 function evoPages(){
   var sum = 0;
   (state.books || []).forEach(function(b){ sum += Math.max(0, (b.pages || 0) - (b.start || 0)); });
-  return sum;
+  return sum + examBonus();
 }
 
 function chapterWords(c){
@@ -1384,6 +1384,207 @@ updateUI = function(){
     renderChapters();
     if(qzPicked === null) renderQuiz();
   }catch(err){ cbShowError('estúdio/quiz: ' + err.message); }
+};
+
+
+/* ================= PROVA DE CADA LIVRO ================= */
+var EXAM_PASS = 7;    // acertos mínimos para ser aprovado
+var EXAM_BONUS = 10;  // páginas de bônus na nau (uma vez por livro aprovado)
+var exam = null;
+
+function normTitle(s){
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function provaFor(book){
+  if(typeof PROVAS === 'undefined' || !book) return null;
+  var t = normTitle(book.title), i, j;
+  for(i = 0; i < PROVAS.length; i++){
+    var p = PROVAS[i], hit = false, bad = false;
+    (p.match || []).forEach(function(m){ if(t.indexOf(m) >= 0) hit = true; });
+    (p.exclude || []).forEach(function(m){ if((' ' + t + ' ').indexOf(' ' + m + ' ') >= 0) bad = true; });
+    if(hit && !bad) return p;
+  }
+  return null;
+}
+
+function examBonus(){
+  var n = 0, ex = state.exams || {};
+  for(var k in ex) if(ex[k] && ex[k].passed) n += EXAM_BONUS;
+  return n;
+}
+
+function shuffleArr(a){
+  for(var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function examSheet(){
+  var s = document.getElementById('exam-sheet');
+  if(!s){
+    s = document.createElement('div');
+    s.className = 'sheet';
+    s.id = 'exam-sheet';
+    s.style.cssText = 'max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch';
+    (document.getElementById('app') || document.body).appendChild(s);
+  }
+  return s;
+}
+
+function openExam(bookId){
+  var book = (state.books || []).find(function(b){ return b.id === bookId; });
+  var p = provaFor(book);
+  if(!book || !p){ toast('Este livro ainda não tem prova.'); return; }
+  if((book.pages || 0) < (book.total || 0)){ toast('A prova é liberada quando você conclui o livro.'); return; }
+  var items = p.q.map(function(q){ return {q: q, idx: shuffleArr([0, 1, 2, 3])}; });
+  shuffleArr(items);
+  exam = {bookId: bookId, key: p.id, titulo: p.titulo, items: items, i: 0, ok: 0, picked: null, done: false};
+  document.getElementById('scrim').classList.add('act');
+  examSheet().classList.add('act');
+  renderExam();
+}
+
+function examPick(k){
+  if(!exam || exam.picked !== null || exam.done) return;
+  var it = exam.items[exam.i];
+  exam.picked = k;
+  if(it.idx[k] === it.q.c) exam.ok++;
+  renderExam();
+}
+
+function examNext(){
+  if(!exam) return;
+  exam.i++;
+  exam.picked = null;
+  if(exam.i >= exam.items.length) examFinish();
+  renderExam();
+}
+
+function examFinish(){
+  exam.done = true;
+  if(!state.exams) state.exams = {};
+  var prev = state.exams[exam.key] || {best: 0, passed: false, tries: 0};
+  var passedNow = exam.ok >= EXAM_PASS;
+  exam.firstPass = passedNow && !prev.passed;
+  state.exams[exam.key] = {
+    best: Math.max(prev.best || 0, exam.ok),
+    passed: !!prev.passed || passedNow,
+    tries: (prev.tries || 0) + 1,
+    date: dayKey(new Date())
+  };
+  save();
+  updateUI();
+  renderBooks();
+  if(exam.firstPass) toast('🏅 Aprovado! +' + EXAM_BONUS + ' páginas de bônus na sua nau');
+}
+
+function renderExam(){
+  var el = examSheet();
+  if(!exam){ el.innerHTML = ''; return; }
+  var total = exam.items.length, h = '';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center"><span class="sf" style="font-size:18px">📝 Prova do livro</span>' +
+       '<button class="ib" onclick="closeSheets()" aria-label="Fechar"><i class="ti ti-x"></i></button></div>' +
+       '<div class="mut" style="margin-top:4px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(exam.titulo) + '</div>';
+
+  if(exam.done){
+    var passed = exam.ok >= EXAM_PASS, rec = state.exams[exam.key] || {};
+    h += '<div style="text-align:center;margin-top:18px"><div style="font-size:46px">' + (passed ? '🏅' : '📚') + '</div>' +
+         '<div class="sf" style="font-size:34px;margin-top:4px">' + exam.ok + ' / ' + total + '</div>' +
+         '<div style="margin-top:6px;font-weight:700;color:' + (passed ? '#22c55e' : '#f59e0b') + '">' + (passed ? 'Aprovado!' : 'Ainda não foi dessa vez') + '</div>' +
+         '<div class="mut" style="margin-top:6px;font-size:13px;line-height:1.5">' +
+           (passed
+              ? (exam.firstPass ? 'Você ganhou o selo de aprovação e +' + EXAM_BONUS + ' páginas de bônus na nau.' : 'Aprovado de novo. O bônus já tinha sido concedido; sua melhor nota é ' + (rec.best || exam.ok) + '/' + total + '.')
+              : 'São necessários ' + EXAM_PASS + ' acertos. Releia os pontos principais e tente de novo.') +
+         '</div></div>' +
+         '<button class="pb" style="margin-top:18px" onclick="openExam(' + exam.bookId + ')">Refazer a prova</button>' +
+         '<button class="ob" style="margin-top:8px" onclick="closeSheets()">Fechar</button>';
+    el.innerHTML = h;
+    return;
+  }
+
+  var it = exam.items[exam.i], q = it.q;
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">' +
+       '<span class="mut" style="font-size:11px">QUESTÃO ' + (exam.i + 1) + ' DE ' + total + '</span>' +
+       '<span class="mut" style="font-size:11px">✅ ' + exam.ok + ' acertos</span></div>' +
+       '<div style="height:5px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:6px"><div style="height:5px;border-radius:4px;width:' + Math.round(exam.i / total * 100) + '%;background:var(--blue-primary)"></div></div>' +
+       '<div class="t" style="margin-top:14px;font-size:16px;line-height:1.45">' + esc(q.q) + '</div>' +
+       '<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">';
+  it.idx.forEach(function(orig, k){
+    var st = 'text-align:left;margin:0;';
+    if(exam.picked !== null){
+      if(orig === q.c) st += 'border-color:#22c55e;background:rgba(34,197,94,.18);';
+      else if(k === exam.picked) st += 'border-color:#ef4444;background:rgba(239,68,68,.18);';
+      else st += 'opacity:.55;';
+    }
+    h += '<button class="ob" style="' + st + '"' + (exam.picked !== null ? ' disabled' : ' onclick="examPick(' + k + ')"') + '><b>' + 'ABCD'.charAt(k) + ')</b> ' + esc(q.o[orig]) + '</button>';
+  });
+  h += '</div>';
+  if(exam.picked !== null){
+    var right = it.idx[exam.picked] === q.c;
+    h += '<div style="margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.05);font-size:13px;line-height:1.5">' +
+         '<b style="color:' + (right ? '#22c55e' : '#ef4444') + '">' + (right ? '✅ Acertou!' : '❌ Errou.') + '</b> ' + esc(q.e) + '</div>' +
+         '<button class="pb" style="margin-top:12px" onclick="examNext()">' + (exam.i + 1 >= total ? 'Ver resultado' : 'Próxima questão') + '</button>';
+  }
+  el.innerHTML = h;
+}
+
+/* fechar a prova junto com os outros painéis */
+var _closeSheetsExam = closeSheets;
+closeSheets = function(){
+  _closeSheetsExam();
+  var s = document.getElementById('exam-sheet');
+  if(s) s.classList.remove('act');
+  exam = null;
+};
+
+/* ---------- lista de livros, agora com a prova ---------- */
+function coverUrl(u){
+  return String(u).replace(/["'()\\\s]/g, function(c){ return {'"': '%22', "'": '%27', '(': '%28', ')': '%29', '\\': '%5C', ' ': '%20'}[c] || encodeURIComponent(c); });
+}
+
+renderBooks = function(){
+  var container = document.getElementById('books-list');
+  if(!container) return;
+  if(!state.books || state.books.length === 0){
+    container.innerHTML = '<div class="card"><div class="mut">Nenhum livro cadastrado ainda. Clique em "Novo Livro" acima.</div></div>';
+    return;
+  }
+  container.innerHTML = state.books.map(function(b){
+    var pct = Math.round((b.pages / b.total) * 100) || 0;
+    var done = b.pages >= b.total;
+    var p = provaFor(b), ex = p && state.exams && state.exams[p.id], row = '';
+    if(p){
+      if(ex && ex.passed){
+        row = '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding:8px 10px;border-radius:8px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.45)">' +
+              '<span style="font-size:12px;color:#22c55e;font-weight:700">🏅 Aprovado · melhor nota ' + ex.best + '/' + p.q.length + '</span>' +
+              '<button class="ob" style="margin:0;padding:4px 10px;font-size:11px;width:auto" onclick="openExam(' + b.id + ')">Refazer</button></div>';
+      } else if(done){
+        row = '<button class="pb" style="margin:10px 0 0;padding:10px;font-size:13px" onclick="openExam(' + b.id + ')">📝 Fazer a prova (' + p.q.length + ' questões)' + (ex ? ' · melhor nota ' + ex.best : '') + '</button>';
+      } else {
+        row = '<div class="mut" style="font-size:11px;margin-top:10px">📝 A prova é liberada quando você concluir o livro</div>';
+      }
+    }
+    return '<div class="card" style="margin:0 0 10px 0;position:relative;overflow:hidden">' +
+      '<div style="display:flex;gap:14px;align-items:center">' +
+        '<div class="bk" style="position:relative;' + (b.cover ? 'background-image:url(' + coverUrl(b.cover) + ');background-size:cover;' : '') + '">' +
+          (b.cover ? '' : esc(b.title.charAt(0))) +
+          (done ? '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(234,179,8,0.9);color:#060e1e;font-size:9px;font-weight:800;text-align:center;padding:1px 0;letter-spacing:0.05em">LIDO</div>' : '') +
+        '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="t" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(b.title) + '</div>' +
+          '<div class="mut" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(b.author) + '</div>' +
+          '<div class="mut" style="margin-top:4px">Progresso: ' + b.pages + ' / ' + b.total + ' pág (' + pct + '%)</div>' +
+        '</div>' +
+        '<button class="ib" onclick="openBookModal(' + b.id + ')" title="Editar"><i class="ti ti-pencil"></i></button>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-color)">' +
+        '<button class="ob" style="flex:1;margin:0;padding:6px;font-size:12px" onclick="openSheetForBook(' + b.id + ')"><i class="ti ti-plus"></i> Lançar Páginas</button>' +
+        '<button class="ob" style="flex:1;margin:0;padding:6px;font-size:12px" onclick="openNotesModal(' + b.id + ')"><i class="ti ti-notes"></i> Anotações</button>' +
+      '</div>' + row +
+    '</div>';
+  }).join('');
 };
 
 if(state && state.logged) { try{ updateUI(); }catch(e){} }
