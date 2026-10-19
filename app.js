@@ -1679,4 +1679,182 @@ updateUI = function(){
   try{ applyDailyGoal(); }catch(err){ cbShowError('painel: ' + err.message); }
 };
 
+
+/* ================= LANÇAMENTO LIVRE DE PÁGINAS ================= */
+function setAmt(n){
+  n = Math.max(1, Math.floor(n) || 1);
+  currentAdd = n;
+  var inp = document.getElementById('amt-input');
+  if(inp) inp.value = n;
+  var s = document.getElementById('amt');
+  if(s) s.textContent = n;
+}
+
+function ensureAmtInput(){
+  var span = document.getElementById('amt');
+  if(!span || !span.parentElement) return;
+  if(document.getElementById('amt-input')) return;
+  var inp = document.createElement('input');
+  inp.id = 'amt-input';
+  inp.type = 'number';
+  inp.min = '1';
+  inp.step = '1';
+  inp.setAttribute('inputmode', 'numeric');
+  inp.setAttribute('aria-label', 'Páginas lidas');
+  inp.style.cssText = 'font-size:36px;font-weight:700;width:110px;text-align:center;background:transparent;border:none;border-bottom:2px solid var(--blue-primary);color:var(--text-main);outline:none;padding:0 0 2px;margin:0;-moz-appearance:textfield';
+  inp.oninput = function(){ var v = parseInt(inp.value, 10); if(v > 0) currentAdd = v; };
+  span.style.display = 'none';
+  span.parentElement.insertBefore(inp, span);
+  var chips = document.createElement('div');
+  chips.style.cssText = 'display:flex;gap:8px;justify-content:center;margin-top:12px';
+  chips.innerHTML = [1, 5, 10, 20, 50].map(function(n){
+    return '<button class="ch" style="padding:6px 14px" onclick="setAmt(' + n + ')">' + n + '</button>';
+  }).join('');
+  span.parentElement.insertAdjacentElement('afterend', chips);
+}
+
+stepAmt = function(delta){ setAmt((currentAdd || 1) + (delta > 0 ? 1 : -1)); };
+
+var _openSheetFree = openSheet;
+openSheet = function(){ _openSheetFree(); ensureAmtInput(); setAmt(currentAdd); };
+
+var _openSheetForBookFree = openSheetForBook;
+openSheetForBook = function(id){ _openSheetForBookFree(id); ensureAmtInput(); setAmt(currentAdd); };
+
+var _logPagesFree = logPages;
+logPages = function(){
+  var inp = document.getElementById('amt-input');
+  if(inp){
+    var v = parseInt(inp.value, 10);
+    if(!(v > 0)){ toast('Digite quantas páginas você leu'); return; }
+    currentAdd = v;
+  }
+  _logPagesFree();
+};
+
+/* ================= CRONÔMETRO DE ESTUDO ================= */
+var TIMER_KINDS = [['leitura', '📖 Leitura'], ['estudo', '🎓 Estudo'], ['escrita', '✍️ Escrita']];
+
+function tState(){
+  if(!state.timer) state.timer = {kind: 'leitura', running: false, startedAt: 0, acc: 0};
+  return state.timer;
+}
+function tElapsed(){
+  var t = tState(), s = t.acc || 0;
+  if(t.running) s += (Date.now() - t.startedAt) / 1000;
+  return Math.max(0, Math.floor(s));
+}
+function pad2(n){ return (n < 10 ? '0' : '') + n; }
+function fmtClock(s){ return pad2(Math.floor(s / 3600)) + ':' + pad2(Math.floor(s % 3600 / 60)) + ':' + pad2(s % 60); }
+function fmtDur(s){
+  var h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+  if(h > 0) return h + 'h ' + pad2(m) + 'min';
+  if(m > 0) return m + ' min';
+  return s > 0 ? s + ' s' : '0 min';
+}
+function timeDay(key){
+  var d = state.time && state.time[key];
+  return d ? (d.leitura || 0) + (d.estudo || 0) + (d.escrita || 0) : 0;
+}
+function timeStats(){
+  var now = new Date(), tm = state.time || {}, total = 0, week = 0, k, i;
+  for(k in tm) total += timeDay(k);
+  for(i = 0; i < 7; i++){ var d = new Date(now); d.setDate(now.getDate() - i); week += timeDay(dayKey(d)); }
+  var key = dayKey(now);
+  return {today: timeDay(key), week: week, total: total, d: tm[key] || {}};
+}
+
+function timerToggle(){
+  var t = tState();
+  if(t.running){ t.acc = tElapsed(); t.running = false; t.startedAt = 0; }
+  else { t.running = true; t.startedAt = Date.now(); }
+  save();
+  renderTimer();
+}
+function timerKind(k){ tState().kind = k; save(); renderTimer(); }
+function timerSave(){
+  var t = tState(), s = tElapsed();
+  if(s < 10){ toast('Sessão muito curta para salvar'); return; }
+  var key = dayKey(new Date());
+  if(!state.time) state.time = {};
+  var d = state.time[key] || (state.time[key] = {leitura: 0, estudo: 0, escrita: 0});
+  d[t.kind] = (d[t.kind] || 0) + s;
+  t.running = false; t.acc = 0; t.startedAt = 0;
+  save();
+  renderTimer();
+  toast('⏱️ Sessão salva: ' + fmtDur(s));
+}
+function timerReset(){
+  var t = tState();
+  if(tElapsed() > 0 && !confirm('Descartar o tempo deste cronômetro sem salvar?')) return;
+  t.running = false; t.acc = 0; t.startedAt = 0;
+  save();
+  renderTimer();
+}
+
+function ensureTimerCard(){
+  var card = document.getElementById('cb-timer-card');
+  if(card) return card;
+  var home = document.getElementById('v-hoje');
+  if(!home) return null;
+  card = document.createElement('div');
+  card.className = 'card';
+  card.id = 'cb-timer-card';
+  var anchor = home.querySelector('.card');   // o painel de progresso
+  if(anchor && anchor.nextElementSibling) home.insertBefore(card, anchor.nextElementSibling);
+  else home.appendChild(card);
+  return card;
+}
+
+function renderTimer(){
+  var card = ensureTimerCard();
+  if(!card) return;
+  var t = tState(), st = timeStats(), run = t.running, el = tElapsed();
+  var badgeTxt = run ? 'Rodando' : (el > 0 ? 'Pausado' : 'Parado');
+  var badgeCol = run ? '#22c55e' : (el > 0 ? '#f59e0b' : 'var(--text-mut)');
+  var kinds = TIMER_KINDS.map(function(k){
+    var on = t.kind === k[0];
+    return '<button class="ch' + (on ? ' sel' : '') + '" style="padding:6px 12px;font-size:12px" onclick="timerKind(\'' + k[0] + '\')">' + k[1] + '</button>';
+  }).join('');
+  var d = st.d;
+  var pages = (state.daily && state.daily[dayKey(new Date())]) || 0;
+  var pace = ((d.leitura || 0) >= 300 && pages > 0) ? '<div class="mut" style="font-size:11px;margin-top:4px">Ritmo de leitura hoje: cerca de ' + Math.round(pages / ((d.leitura || 0) / 3600)) + ' págs/hora</div>' : '';
+  card.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center">' +
+      '<span class="mut" style="font-size:11px">⏱️ CRONÔMETRO DE ESTUDO</span>' +
+      '<span style="font-size:11px;font-weight:700;color:' + badgeCol + '">' + (run ? '● ' : '') + badgeTxt + '</span></div>' +
+    '<div class="sf" id="cb-timer-display" style="font-size:42px;text-align:center;margin:10px 0 8px;font-variant-numeric:tabular-nums;letter-spacing:.02em">' + fmtClock(el) + '</div>' +
+    '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">' + kinds + '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:12px">' +
+      '<button class="pb" style="margin:0;flex:2" onclick="timerToggle()">' + (run ? '⏸ Pausar' : (el > 0 ? '▶ Continuar' : '▶ Iniciar')) + '</button>' +
+      '<button class="ob" style="margin:0;flex:1" onclick="timerSave()">✔ Salvar</button>' +
+      '<button class="ob" style="margin:0;flex:0 0 44px;padding:0" onclick="timerReset()" aria-label="Zerar">↺</button></div>' +
+    '<div style="display:flex;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-color)">' +
+      [['Hoje', st.today], ['7 dias', st.week], ['Total', st.total]].map(function(x){
+        return '<div style="flex:1"><div class="mut" style="font-size:11px">' + x[0] + '</div><div class="sf" style="font-size:15px;color:var(--blue-primary);margin-top:2px">' + fmtDur(x[1]) + '</div></div>';
+      }).join('') + '</div>' +
+    '<div class="mut" style="font-size:11px;margin-top:8px">Hoje: 📖 ' + fmtDur(d.leitura || 0) + ' · 🎓 ' + fmtDur(d.estudo || 0) + ' · ✍️ ' + fmtDur(d.escrita || 0) + '</div>' + pace;
+}
+
+/* relógio: calcula pelo horário real, então não perde tempo com a tela apagada ou a aba em segundo plano */
+setInterval(function(){
+  var d = document.getElementById('cb-timer-display');
+  if(d) d.textContent = fmtClock(tElapsed());
+}, 1000);
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible'){ try{ renderTimer(); }catch(e){} }
+});
+
+/* o diário de bordo também mostra o tempo do dia */
+dayInfo = function(key, idx){
+  var p = (state.daily && state.daily[key]) || 0, s = timeDay(key);
+  toast(DIAS_NOME[idx] + ': ' + p + ' de ' + DAILY_GOAL + ' páginas' + (s ? ' · ' + fmtDur(s) : '') + (isDone(key) ? ' 🔥' : ''));
+};
+
+var _timerBase = updateUI;
+updateUI = function(){
+  _timerBase();
+  try{ renderTimer(); }catch(err){ cbShowError('cronômetro: ' + err.message); }
+};
+
 if(state && state.logged) { try{ updateUI(); }catch(e){} }
