@@ -58,18 +58,35 @@ function bibCapa(item){
   }).catch(function(){ return ''; });   // sem internet: não guarda, tenta de novo depois
 }
 
+function bibApplyCover(elId, u){
+  if(!u) return;
+  var img = new Image();     // só troca a letra pela capa se a imagem carregar de verdade
+  img.onload = function(){
+    var el = document.getElementById(elId);
+    if(el){
+      el.style.backgroundImage = 'url(' + coverUrl(u) + ')';
+      var l = el.querySelector('.cv-l'); if(l) l.remove();   // tira só a letra, mantém a faixa LIDO
+    }
+  };
+  img.src = u;
+}
+
 function bibLoadCovers(){
   bibCat().forEach(function(item){
-    bibCapa(item).then(function(u){
-      var el = document.getElementById('bib-cv-' + item.id);
-      if(!el || !u) return;
-      var img = new Image();     // só troca a letra pela capa se a imagem carregar de verdade
-      img.onload = function(){
-        var cur = document.getElementById('bib-cv-' + item.id);
-        if(cur){ cur.style.backgroundImage = 'url(' + coverUrl(u) + ')'; cur.textContent = ''; }
-      };
-      img.src = u;
-    });
+    bibCapa(item).then(function(u){ bibApplyCover('bib-cv-' + item.id, u); });
+  });
+}
+
+/* capas da estante: a que a pessoa cadastrou, ou a do catálogo / Open Library */
+function bibLoadShelfCovers(){
+  (state.books || []).forEach(function(b){
+    var elId = 'shelf-cv-' + b.id;
+    if(b.cover){ bibApplyCover(elId, b.cover); return; }
+    var n = normTitle(b.title);
+    var cat = bibCat().find(function(x){ return x.id === b.fromCatalog || normTitle(x.t) === n; });
+    if(!cat && b.file) return;        // livro pessoal enviado em arquivo: não consulta serviço externo
+    var item = cat || {id: 'b' + b.id, t: b.title, a: b.author && b.author !== 'Desconhecido' ? b.author : ''};
+    bibCapa(item).then(function(u){ bibApplyCover(elId, u); });
   });
 }
 
@@ -240,7 +257,7 @@ function bibRenderGrid(){
     var shelf = bibOnShelf(i), prova = !!provaFor({title: i.t});
     return '<div class="card" style="margin:0;padding:10px;display:flex;flex-direction:column;min-width:0">' +
       '<div id="bib-cv-' + i.id + '" style="aspect-ratio:2/3;border-radius:8px;background:linear-gradient(135deg,' + bibCor(i) + ',#0d1b33);background-size:cover;background-position:center;' +
-        'display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:rgba(255,255,255,.85)">' + esc(i.t.charAt(0)) + '</div>' +
+        'display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:rgba(255,255,255,.85)"><span class="cv-l">' + esc(i.t.charAt(0)) + '</span></div>' +
       '<div style="font-size:13px;font-weight:700;margin-top:8px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(i.t) + '</div>' +
       '<div class="mut" style="font-size:11px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (i.a ? esc(i.a) : '&nbsp;') + '</div>' +
       '<div style="font-size:10px;margin-top:6px;line-height:1.5;color:var(--text-muted)">' + (i.dominio ? '🌐 Domínio público (original)' : '© Obra protegida') + (prova ? '<br>📝 Tem prova' : '') + '</div>' +
@@ -466,42 +483,89 @@ function bibShareFile(bookId){
   });
 }
 
-/* ---------- cartões da estante ganham os botões de arquivo ---------- */
-var _bibRenderBooksBase = renderBooks;
-renderBooks = function(){
-  _bibRenderBooksBase();
-  try{ bibDecorateShelf(); }catch(err){ cbShowError('biblioteca/estante: ' + err.message); }
-};
+/* ---------- ESTANTE: mesma grade de capas da Biblioteca ---------- */
+(function(){
+  var st = document.createElement('style');
+  st.textContent = '#books-list.bib-shelf{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:14px 16px 0}';
+  document.head.appendChild(st);
+})();
 
-function bibDecorateShelf(){
-  var cards = document.querySelectorAll('#books-list > .card');
-  var books = state.books || [];
-  if(cards.length !== books.length) return;
-  books.forEach(function(b, i){
-    var old = cards[i].querySelector('.bib-actions');
-    if(old) old.remove();
-    var d = document.createElement('div');
-    d.className = 'bib-actions';
-    d.style.cssText = 'margin-top:10px;padding-top:10px;border-top:1px solid var(--border-color)';
-    var btn = 'class="ob" style="flex:1;margin:0;padding:6px 4px;font-size:12px"';
-    if(b.file){
-      d.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px;color:var(--text-muted)">' +
-          '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📎 ' + esc(b.file.name) + ' · ' + bibSize(b.file.size) + ' · só neste aparelho</span>' +
-          '<button class="ib" onclick="bibRemoveFile(' + b.id + ')" aria-label="Remover arquivo" style="flex:0 0 auto"><i class="ti ti-trash"></i></button></div>' +
-        '<div style="display:flex;gap:8px;margin-top:8px">' +
-          '<button ' + btn + ' onclick="bibOpenBookFile(' + b.id + ')">' + (b.file.ext === 'pdf' ? '📖 Abrir PDF' : '⬇ Baixar EPUB') + '</button>' +
-          '<button ' + btn + ' onclick="bibShareFile(' + b.id + ')">🔁 Enviar arquivo</button>' +
-          '<button ' + btn + ' onclick="bibIndicarBook(' + b.id + ')">📤 Indicar</button></div>';
-    } else {
-      d.innerHTML =
-        '<div style="display:flex;gap:8px">' +
-          '<button ' + btn + ' onclick="bibOpenFile(' + b.id + ')">📎 Anexar PDF/EPUB</button>' +
-          '<button ' + btn + ' onclick="bibIndicarBook(' + b.id + ')">📤 Indicar a um amigo</button></div>';
-    }
-    cards[i].appendChild(d);
-  });
+function bibShelfCard(b){
+  var total = b.total || 0, pages = b.pages || 0;
+  var pct = total ? Math.min(100, Math.round(pages / total * 100)) : 0;
+  var done = total > 0 && pages >= total;
+  var p = provaFor(b), ex = p && state.exams && state.exams[p.id];
+  var ri = resumoIndex(b.id), rw = ri >= 0 ? chapterWords(state.ch[ri]) : 0;
+  var primary, items = [];
+
+  /* botão principal, embaixo da capa */
+  if(!done){
+    primary = '<button class="pb" style="margin:0;padding:8px 2px;font-size:13px;white-space:nowrap" onclick="openSheetForBook(' + b.id + ')">+ Lançar páginas</button>';
+  } else if(p && ex && ex.passed){
+    primary = '<button class="ob" style="margin:0;padding:8px 2px;font-size:12px;width:100%;white-space:nowrap;border-color:rgba(34,197,94,.6);color:#22c55e" onclick="openExam(' + b.id + ')">🏅 ' + ex.best + '/' + p.q.length + ' · refazer</button>';
+  } else if(p){
+    primary = '<button class="pb" style="margin:0;padding:8px 4px;font-size:13px" onclick="openExam(' + b.id + ')">📝 Fazer a prova</button>';
+  } else if(ri < 0){
+    primary = '<button class="pb" style="margin:0;padding:8px 4px;font-size:13px" onclick="openResumo(' + b.id + ')">✍️ Escrever resumo</button>';
+  } else {
+    primary = '<button class="ob" style="margin:0;padding:8px 4px;font-size:12px;width:100%" disabled>✔ Concluído</button>';
+  }
+
+  /* demais opções, em duas colunas */
+  items.push(['📝 Notas', 'openNotesModal(' + b.id + ')']);
+  items.push(['✏️ Editar', 'openBookModal(' + b.id + ')']);
+  if(b.file){
+    items.push([b.file.ext === 'pdf' ? '📖 Abrir' : '⬇ Baixar', 'bibOpenBookFile(' + b.id + ')']);
+    items.push(['🔁 Enviar', 'bibShareFile(' + b.id + ')']);
+  } else {
+    items.push(['📎 Arquivo', 'bibOpenFile(' + b.id + ')']);
+  }
+  items.push(['📤 Indicar', 'bibIndicarBook(' + b.id + ')']);
+  if(p && !done) items.push(['🔒 Prova', 'openExam(' + b.id + ')']);
+  if(done && (p || ri >= 0)){
+    var rl = ri < 0 ? '✍️ Resumo' : (rw >= RESUMO_MIN ? '✍️ Resumo ✔' : '✍️ Rascunho');
+    items.push([rl, 'openResumo(' + b.id + ')']);
+  }
+  var grid = items.map(function(it, i){
+    var span = (i === items.length - 1 && items.length % 2 === 1) ? 'grid-column:1/-1;' : '';
+    return '<button class="ob" style="margin:0;padding:7px 2px;font-size:11.5px;width:100%;white-space:nowrap;' + span + '" onclick="' + it[1] + '">' + it[0] + '</button>';
+  }).join('');
+
+  var tema = b.tema ? '<span style="color:' + (typeof hrTemaCor === 'function' ? hrTemaCor(b.tema) : 'var(--blue-primary)') + '">●</span> ' + esc(b.tema) : '';
+  var fileChip = b.file
+    ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:4px;font-size:10px;color:var(--text-muted)">' +
+        '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📎 ' + esc(b.file.ext.toUpperCase()) + ' · ' + bibSize(b.file.size) + ' · só aqui</span>' +
+        '<button class="ib" onclick="bibRemoveFile(' + b.id + ')" aria-label="Remover arquivo" style="flex:0 0 auto;width:24px;height:24px;padding:0"><i class="ti ti-trash"></i></button></div>'
+    : '';
+
+  return '<div class="card" style="margin:0;padding:10px;display:flex;flex-direction:column;min-width:0">' +
+    '<div id="shelf-cv-' + b.id + '" style="position:relative;aspect-ratio:2/3;border-radius:8px;background:linear-gradient(135deg,' + bibCor({id: 'b' + b.id, t: b.title}) + ',#0d1b33);background-size:cover;background-position:center;' +
+      'display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:rgba(255,255,255,.85)"><span class="cv-l">' + esc((b.title || '?').charAt(0)) + '</span>' +
+      (done ? '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(234,179,8,.92);color:#060e1e;font-size:10px;font-weight:800;text-align:center;padding:2px 0;letter-spacing:.05em;border-radius:0 0 8px 8px">LIDO</div>' : '') +
+    '</div>' +
+    '<div style="font-size:13px;font-weight:700;margin-top:8px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(b.title) + '</div>' +
+    '<div class="mut" style="font-size:11px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (b.author ? esc(b.author) : '&nbsp;') + '</div>' +
+    '<div style="height:5px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:8px"><div style="height:5px;border-radius:4px;width:' + pct + '%;background:' + (done ? '#eab308' : 'var(--blue-primary)') + '"></div></div>' +
+    '<div class="mut" style="font-size:11px;margin-top:4px">' + pages + ' / ' + total + ' pág · ' + pct + '%</div>' +
+    (tema ? '<div style="font-size:10px;margin-top:4px;color:var(--text-muted)">' + tema + '</div>' : '') + fileChip +
+    '<div style="margin-top:auto;padding-top:10px"><div style="display:flex;margin-bottom:6px">' + primary + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">' + grid + '</div></div>' +
+  '</div>';
 }
+
+renderBooks = function(){
+  var el = document.getElementById('books-list');
+  if(!el) return;
+  el.classList.add('bib-shelf');
+  if(!state.books || state.books.length === 0){
+    el.innerHTML = '<div class="card" style="grid-column:1/-1;margin:0;text-align:center"><div class="mut">Sua estante está vazia.<br>Toque em <b>Biblioteca</b> para escolher um livro, em <b>Novo Livro</b> ou envie seu PDF.</div></div>';
+    return;
+  }
+  try{
+    el.innerHTML = state.books.map(bibShelfCard).join('');
+    bibLoadShelfCovers();
+  }catch(err){ cbShowError('biblioteca/estante: ' + err.message); }
+};
 
 /* ---------- dono do app: exportar a estante como catálogo ---------- */
 function bibOpenExport(){
