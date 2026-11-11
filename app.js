@@ -33,7 +33,7 @@ window.addEventListener('unhandledrejection', function(e){ cbShowError(String(e.
     '  .nav{position:fixed !important;left:6px !important;right:6px !important;bottom:calc(6px + env(safe-area-inset-bottom)) !important;width:auto !important;max-width:none !important;height:auto !important;margin:0 auto !important;padding:6px 4px calc(6px + env(safe-area-inset-bottom) * 0) !important;box-sizing:border-box;align-items:stretch;justify-content:space-between;gap:2px;z-index:50}',
     '  .nav button{flex:1 1 0 !important;min-width:0 !important;height:auto !important;padding:8px 1px 7px !important;display:flex !important;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.1 !important;white-space:nowrap;overflow:visible !important;font-size:clamp(8px,2.45vw,11px) !important;letter-spacing:-.2px}',
     '  .nav button i{font-size:20px}',
-    '  .toast{top:calc(10px + env(safe-area-inset-top))}',
+    '  .toast{top:calc(10px + env(safe-area-inset-top));bottom:auto !important;height:auto !important}',
     '}'
   ].join('\n');
   document.head.appendChild(st);
