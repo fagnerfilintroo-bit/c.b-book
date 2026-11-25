@@ -49,7 +49,7 @@ function bibCapa(item){
   var cache = bibCapaCache();
   if(cache[item.id] !== undefined) return Promise.resolve(cache[item.id]);
   var url = 'https://openlibrary.org/search.json?limit=1&fields=cover_i&title=' + encodeURIComponent(item.busca || item.t) +
-            (item.a ? '&author=' + encodeURIComponent(item.a) : '');
+            ((item.buscaA || item.a) ? '&author=' + encodeURIComponent(item.buscaA || item.a) : '');
   return fetch(url).then(function(r){ return r.json(); }).then(function(j){
     var c = j && j.docs && j.docs[0] && j.docs[0].cover_i;
     var u = c ? 'https://covers.openlibrary.org/b/id/' + c + '-M.jpg' : '';
