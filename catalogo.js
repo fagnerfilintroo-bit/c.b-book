@@ -32,7 +32,7 @@ var CATALOGO = [
   {id:'memorias-postumas', t:'Memórias Póstumas de Brás Cubas', a:'Machado de Assis', tags:['Clássicos','Ficção','Enem e concursos'], tema:'Ficção', dominio:true, pag:null, cover:''},
   {id:'os-lusiadas', t:'Os Lusíadas', a:'Luís de Camões', tags:['Clássicos','Poesia','História','Enem e concursos'], tema:'História', dominio:true, pag:null, cover:''},
   {id:'o-cortico', t:'O Cortiço', a:'Aluísio Azevedo', tags:['Clássicos','Ficção','Enem e concursos'], tema:'Ficção', dominio:true, pag:null, cover:''},
-  {id:'dom-casmurro', t:'Dom Casmurro', a:'Machado de Assis', tags:['Clássicos','Ficção','Enem e concursos'], tema:'Ficção', dominio:true, pag:null, cover:''},
+  {id:'dom-casmurro', t:'Dom Casmurro', a:'Machado de Assis', tags:['Clássicos','Ficção','Enem e concursos'], tema:'Ficção', dominio:true, pag:null, cover:''},  {id:'o-principe', t:'O Príncipe', a:'Nicolau Maquiavel', busca:'The Prince', buscaA:'Machiavelli', tags:['Política','Filosofia','Clássicos','História','Enem e concursos'], tema:'Política', dominio:true, pag:null, cover:''},
 
   /* livros que já têm prova no dados.js */
   {id:'divina-comedia', t:'A Divina Comédia', a:'Dante Alighieri', tags:['Clássicos','Poesia'], tema:'Ficção', dominio:true, pag:null, cover:''},
